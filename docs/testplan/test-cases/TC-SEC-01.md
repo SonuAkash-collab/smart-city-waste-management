@@ -29,7 +29,7 @@
 |---|---|---|
 | 5 | Submit four consecutive login attempts with an incorrect password. | All attempts are rejected, and the account is not yet locked. |
 | 6 | Attempt to log in with the correct password after the four failed attempts. | Login succeeds, and the account remains unlocked. |
-| 7 | Submit five consecutive login attempts with an incorrect password. | The fifth consecutive failure triggers a 15-minute lockout. |
+| 7 | Submit five consecutive login attempts with an incorrect password. | All attempts are rejected, and the fifth consecutive failure triggers a 15-minute lockout. |
 | 8 | Attempt to log in with the correct password during the lockout period. | Login remains blocked during the lockout. |
 | 9 | After 15 minutes have elapsed, attempt to log in with the correct password. | Authentication succeeds if no other restriction applies. |
 | 10 | After a successful login, submit a new sequence of failed login attempts. | The consecutive-failure counter starts from zero. |
