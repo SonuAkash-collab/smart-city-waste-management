@@ -1,0 +1,86 @@
+@startuml component-diagram
+title Smart City Waste Management System - Component Diagram
+
+left to right direction
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+
+actor Citizen
+actor Driver
+actor "Admin / Municipal Officer" as Admin
+actor "Disposal Facility Operator" as Operator
+
+package "Presentation Layer" {
+  component "Web Frontend" as Web
+}
+
+package "Application / Service Layer" {
+  component "Auth & User Service" as Auth
+  component "Request Service" as Request
+  component "Fleet Service" as Fleet
+  component "Facility Service" as Facility
+  component "Route Optimization Engine" as Route
+  component "Notification & Reporting Service" as Notify
+}
+
+package "External Map Service" {
+  component "Map Service\n(OpenStreetMap)" as Map
+}
+
+database "Database\n(PostgreSQL)" as DB
+
+Citizen --> Web
+Driver --> Web
+Admin --> Web
+Operator --> Web
+
+Web --> Auth : Authentication
+Web --> Request : Collection requests
+Web --> Fleet : Vehicle management
+Web --> Facility : Facility management
+Web --> Route : Route generation
+Web --> Notify : Dashboard / reports
+
+Auth --> DB : Users, roles, audit log
+Request --> DB : Requests / status
+Fleet --> DB : Vehicles / capacity
+Facility --> DB : Facilities / capacity
+Route --> DB : Routes / stops
+Notify --> DB : Reports / status data
+
+Request --> Map : Location lookup
+Facility --> Map : Facility locations
+Route --> Map : Distance / route map
+Web --> Map : Map display
+
+Request --> Notify : Status changes
+Route --> Fleet : Vehicle capacity
+Route --> Facility : Facility eligibility
+Route --> Request : Approved requests
+Route --> Notify : Route / stop updates
+
+note bottom of Auth
+SCW-SEC-006: Admin audit logging
+end note
+
+note bottom of Web
+SCW-SEC-003: HTTPS (TLS 1.2+)
+end note
+
+note bottom of Route
+SCW-F-040 to SCW-F-044
+SCW-NF-001: Route generation performance
+end note
+
+note right of DB
+Persistent storage for system data
+end note
+
+note bottom
+Shared requirements:
+SCW-NF-002, SCW-NF-003,
+SCW-NF-005 and SCW-SO-2
+apply to all services.
+end note
+
+@enduml
