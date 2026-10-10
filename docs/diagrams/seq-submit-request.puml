@@ -1,0 +1,36 @@
+@startuml
+title Citizen Submits Collection Request
+
+actor Citizen
+participant "Web Frontend" as Web
+participant "Request Service" as Request
+participant "Database (PostgreSQL)" as Database
+participant "Notification & Reporting Service" as Notifications
+
+Citizen -> Web: Enter request details\n(location, waste type, estimated quantity,\noptional photo)
+Web -> Request: POST /api/v1/requests\nRequest fields; photo if provided
+activate Request
+Request -> Request: Validate required request data
+
+alt Location is missing
+    Request --> Web: HTTP 422 (validation error)
+    Web --> Citizen: Display validation error
+else Required request data is present
+    Request -> Request: Assign priority (SCW-F-011)
+    note right of Request
+      Priority is assigned from waste type
+      and request age: High, Medium, or Low.
+    end note
+    Request -> Database: Save request; associate optional photo if provided
+    Request -> Notifications: Trigger status-change notification\n(Submitted; SCW-F-050)
+    Request --> Web: HTTP 201 (request accepted)
+    Web --> Citizen: Display submission result
+end
+
+deactivate Request
+
+note over Web,Request
+  The optional photo's representation and transfer mechanism
+  are not specified by the project documents.
+end note
+@enduml
