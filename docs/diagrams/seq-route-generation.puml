@@ -1,0 +1,59 @@
+@startuml
+title Smart City Waste Management - Route Generation
+
+autonumber
+
+actor Admin
+participant "Web Frontend" as Web
+participant "Auth & User Service" as Auth
+participant "Route Optimization Engine" as Route
+participant "Request Service" as Request
+participant "Fleet Service" as Fleet
+participant "Facility Service" as Facility
+participant "Map Service\n(OpenStreetMap)" as Map
+database "Database\n(PostgreSQL)" as DB
+
+Admin -> Web: Request route generation for date
+Web -> Auth: Validate user identity and role
+Auth --> Web: Authorization result
+
+alt User is authorized
+    Web -> Route: Generate routes for selected date
+
+    Route -> Request: Fetch approved requests for date
+    Request -> DB: Query approved requests
+    DB --> Request: Approved request records
+    Request --> Route: Approved requests with locations and priorities
+
+    Route -> Fleet: Fetch available vehicles and capacities
+    Fleet -> DB: Query available vehicle records
+    DB --> Fleet: Vehicle records
+    Fleet --> Route: Available vehicles and capacities
+
+    Route -> Facility: Fetch suitable disposal facilities
+    Facility -> DB: Query facility records
+    DB --> Facility: Facility records
+    Facility --> Route: Facility locations and details
+
+    Route -> Map: Obtain geographic information as required
+    Map --> Route: Map/geographic information
+
+    note over Route
+      Order stops by priority,
+      then shortest distance.
+      Respect vehicle capacity.
+      When full, direct the vehicle
+      to the nearest suitable facility.
+    end note
+
+    Route -> DB: Save generated routes and stop order
+    DB --> Route: Persistence result
+    Route --> Web: Generated routes and ordered stops
+    Web --> Admin: Display route-generation result
+
+else User is not authorized
+    Auth --> Web: Access denied
+    Web --> Admin: Display authorization error
+end
+
+@enduml
