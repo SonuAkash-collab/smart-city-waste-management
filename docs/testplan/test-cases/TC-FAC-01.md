@@ -7,7 +7,7 @@
 | Requirement(s) | SCW-F-031, SCW-F-032 |
 | Type | Functional |
 | Priority | High |
-| Preconditions | 1. The system and database are available. 2. An authorized Facility Operator account exists. 3. A registered waste collection vehicle exists. 4. A facility is registered with accepted waste types and a daily capacity. |
+| Preconditions | 1. The application and database are available. 2. An authorized Facility Operator account exists. 3. A registered waste collection vehicle exists. 4. A facility is registered with accepted waste types and a daily capacity. |
 | Test Data | Facility: FAC-001; accepted waste type: Wet; unsupported waste type: Hazardous; initial remaining capacity: 1000 kg; valid delivery: 300 kg; excess delivery: 800 kg; invalid weights: 0 kg and -50 kg. |
 | Actual Result | To be recorded during test execution. |
 | Status | Not run |
