@@ -37,7 +37,22 @@ Manage waste collection requests, vehicles and disposal facilities. Generate eff
 
 ## Tech Stack
 
-To be finalized.
+| Layer             | Choice                                                                 |
+|-------------------|------------------------------------------------------------------------|
+| Frontend          | React (web, mobile-responsive) + Leaflet/OpenStreetMap for maps        |
+| Backend           | Python FastAPI (REST, JSON)                                            |
+| Database          | PostgreSQL                                                             |
+| Auth              | JWT bearer tokens, bcrypt password hashing                             |
+| Distance          | Haversine distance (optionally OSRM road distance)                     |
+| Routing algorithm | Greedy heuristic: approved requests sorted by priority first, then nearest-next stop, while vehicle load ≤ capacity. When full, go to the nearest facility that accepts that waste type and has capacity, then continue. |
+| Tools             | GitHub, PlantUML/draw.io, Swagger (FastAPI auto-docs), Postman, Pytest, JMeter/Locust |
+
+## Architecture
+
+**Layered (3-tier) architecture:** Presentation (React) → Application/Service layer (FastAPI services) → Data layer (PostgreSQL).
+
+- **Rationale:** clear separation of concerns, easy for a 4-person team, easy to test each layer.
+- **Rejected alternative:** microservices, because they are too complex to deploy and operate at this scale.
 
 ## Repository Structure
 
