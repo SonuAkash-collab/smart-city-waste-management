@@ -1,9 +1,9 @@
 # 4. Features Not Tested
 
-**Project:** Smart City Waste Management System  
-**Version:** 1.0  
-**Authors:** Team 04  
-**Date:** 10-10-2026  
+**Project:** Smart City Waste Management System
+**Version:** 1.0
+**Authors:** Team 04
+**Date:** 10-10-2026
 **Status:** Draft
 
 ## 4.1 Purpose
