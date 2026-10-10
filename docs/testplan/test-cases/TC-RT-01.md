@@ -71,6 +71,3 @@
 \- Record \*\*Not run\*\* until the test has actually been executed.
 
 \- Report any mismatch between the expected and actual results as a defect.
-
-
-
