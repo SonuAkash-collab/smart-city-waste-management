@@ -21,7 +21,7 @@ This section distinguishes Team 04's documented project and testing assignments 
 | Rottela Haritej | Team member | Sections 3–5 | Owns TC-RT-01, TC-RT-02, TC-RT-03 and TC-PERF-01. Prepares the performance report for each performance test run. As a test case owner, records the Actual result and Status for assigned cases during test cycles. |
 | Purushothama KC | Team member | Sections 5.1 and 10–12 | Owns TC-VEH-01, TC-FAC-01, TC-SEC-01 and TC-SEC-02. As a test case owner, records the Actual result and Status for assigned cases during test cycles. |
 
-When a tester finds a defect, the tester prepares the defect report as a GitHub Issue with the documented TC ID, requirement ID, reproduction steps, expected and actual results, severity, and screenshot or log. Its intended audience is the developer responsible for the component. The sources do not define a defect-assignment or escalation workflow.
+When a tester finds a defect, the tester prepares the defect report as a GitHub Issue with the documented TC ID, requirement ID, reproduction steps, expected and actual results, severity, and screenshot or log. Its intended audience is the developer responsible for the component. Working assumption: defect handling in this plan ends with the documented GitHub Issue and its intended audience; this section assigns no defect triage, issue-assignment, or escalation responsibility.
 
 The approval section lists the four team members for signatures confirming review of the Test Plan and agreement with its scope, approach, schedule and responsibilities. It identifies Sonu Akash as lead / integrator and test manager, Rishit V N S as tester for collection requests, Rottela Haritej as tester for route generation and performance, and Purushothama KC as tester for vehicles, facilities and security. Testing starts only after all approvals are recorded.
 
@@ -36,10 +36,9 @@ These are application roles described in the SRS, not additional Test Plan owner
 | Admin / Municipal Officer | Approves or rejects requests, overrides priority, manages vehicles, facilities and accounts, generates routes, views the dashboard, and exports reports. |
 | Disposal Facility Operator | Records incoming waste and manages facility capacity. |
 
-The test cases may use these roles as test actors where specified in their preconditions or steps. The project documents do not assign these application users responsibilities for conducting or approving system tests.
+The test cases may use these roles as test actors where specified in their preconditions or steps. Application-role actors are not assigned responsibility for conducting or approving system tests; test execution ownership is limited to the team assignments in Section 9.1, and approval is recorded by the signatories listed in Section 15.
 
 ### 9.3 Open Responsibility Decisions
 
-- Responsibilities for executing system-wide activities that are not assigned to a named test case owner require team confirmation.
-- The project context defines PR reviewer pairs (Sonu Akash ↔ Rishit V N S; Rottela Haritej ↔ Purushothama KC), but does not assign them responsibility for Test Plan or test-result reviews. Any additional test-review ownership or approval arrangements require team confirmation; the approval signatures and testing-start condition in Section 15 remain as documented.
-- The sources do not define defect triage, issue assignment, or escalation responsibilities.
+- Working assumption: system-wide activities without a named test case owner have no additional individual execution owner assigned by this section; the documented named test case owners retain responsibility for their cases.
+- The project context assigns PR reviewer pairs (Sonu Akash ↔ Rishit V N S; Rottela Haritej ↔ Purushothama KC) for pull requests. Those pairs are not assigned Test Plan or test-result review responsibilities here; approval remains limited to the signatures and testing-start condition documented in Section 15.
