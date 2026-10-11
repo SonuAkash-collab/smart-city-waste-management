@@ -68,27 +68,39 @@ Every requirement ID has at least one dedicated test case. Security objectives (
 |---|---|---|---|
 | TC-AUTH-01 | SCW-F-001 | Functional | Sonu Akash |
 | TC-AUTH-02 | SCW-F-002, SCW-SEC-004 | Security | Sonu Akash |
+| TC-ADM-01 | SCW-F-003 | Functional | Sonu Akash |
 | TC-NOT-01 | SCW-F-050 | Functional | Sonu Akash |
+| TC-RPT-01 | SCW-F-051, SCW-F-052 | Functional | Sonu Akash |
 | TC-REQ-01 | SCW-F-010 | Functional | Rishit V N S |
 | TC-REQ-02 | SCW-F-011 | Functional | Rishit V N S |
 | TC-REQ-03 | SCW-F-012, SCW-F-013 | Functional | Rishit V N S |
+| TC-REQ-04 | SCW-F-014 | Functional | Rishit V N S |
 | TC-RT-01 | SCW-F-040, SCW-F-041 | Functional | Rottela Haritej |
 | TC-RT-02 | SCW-F-042, SCW-F-023 | Functional | Rottela Haritej |
 | TC-RT-03 | SCW-F-043, SCW-F-044 | Functional | Rottela Haritej |
+| TC-RT-04 | SCW-F-042 | Functional | Rottela Haritej |
 | TC-PERF-01 | SCW-NF-001, SCW-NF-002 | Performance | Rottela Haritej |
+| TC-PERF-02 | SCW-NF-002 | Performance | Rottela Haritej |
+| TC-AVL-01 | SCW-NF-003 | Reliability | Rottela Haritej |
+| TC-USE-01 | SCW-NF-004 | Usability | Rottela Haritej |
+| TC-MNT-01 | SCW-NF-005 | Maintainability | Rottela Haritej |
 | TC-VEH-01 | SCW-F-020, SCW-F-021 | Functional | Purushothama KC |
+| TC-VEH-02 | SCW-F-022 | Functional / Authorization | Purushothama KC |
 | TC-FAC-01 | SCW-F-031, SCW-F-032 | Functional | Purushothama KC |
+| TC-FAC-02 | SCW-F-030 | Functional | Purushothama KC |
 | TC-SEC-01 | SCW-SEC-001, SCW-SEC-005 | Security | Purushothama KC |
 | TC-SEC-02 | SCW-SEC-002, SCW-SEC-004 | Security | Purushothama KC |
+| TC-SEC-03 | SCW-SEC-003 | Security | Purushothama KC |
+| TC-SEC-04 | SCW-SEC-006 | Security | Purushothama KC |
 
 ### 13.4 Coverage Summary
 
-| Category | Total | Covered by a test case | Sprint testing | Objectives (indirect) |
+| Category | Total IDs | Covered by a dedicated test case | Covered through security requirement test cases | Coverage |
 |---|---|---|---|---|
-| Functional (SCW-F) | 23 | 17 | 6 | – |
-| Non-functional (SCW-NF) | 5 | 2 | 3 | – |
-| Security requirements (SCW-SEC) | 6 | 4 | 2 | – |
-| Security objectives (SCW-SO) | 2 | – | – | 2 |
-| **Total** | **36** | **23** | **11** | **2** |
+| Functional (SCW-F) | 23 | 23 | – | 100% |
+| Non-functional (SCW-NF) | 5 | 5 | – | 100% |
+| Security requirements (SCW-SEC) | 6 | 6 | – | 100% |
+| Security objectives (SCW-SO) | 2 | – | 2 | 100% |
+| **Total** | **36** | **34** | **2** | **100%** |
 
-All 14 test cases trace to at least one requirement ID, and every requirement ID is covered by a test case, by sprint testing, or (for objectives) through its security requirements.
+The plan contains 26 test cases. All 26 trace to at least one requirement ID, and all 36 requirement IDs are covered by at least one test case (100% requirements coverage).
