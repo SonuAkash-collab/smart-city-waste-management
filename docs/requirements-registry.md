@@ -75,8 +75,8 @@ Every functional requirement has at least one dedicated test case. Owners may ad
 | TC-FAC-01 | F-031, F-032 intake reduces capacity; full facility excluded | Purushothama |
 | TC-SEC-01 | SEC-001, SEC-005 hashed password; lockout after 5 failures | Purushothama |
 | TC-SEC-02 | SEC-002, SEC-004 expired/forged token rejected | Purushothama |
-| TC-ADM-01 | F-003 Admin creates and deactivates Driver/Operator accounts | Sonu |
-| TC-RPT-01 | F-051, F-052 Admin dashboard figures and daily CSV report export | Sonu |
+| TC-ADM-01 | F-003 Admin creates and deactivates Driver/Operator accounts | Rishit |
+| TC-RPT-01 | F-051, F-052 Admin dashboard figures and daily CSV report export | Haritej |
 | TC-REQ-04 | F-014 Admin views, filters, approves and rejects requests | Rishit |
 | TC-RT-04 | F-042 nearest suitable facility chosen when vehicle is full | Haritej |
 | TC-PERF-02 | NF-002 API response time under 100 concurrent users | Haritej |
