@@ -103,3 +103,54 @@ The rendered sequence diagram is located at `docs/diagrams/seq-route-generation.
 ## 8. Conclusion
 
 The sequence diagram describes the main route-generation workflow, from the administrator's request and authorization through data retrieval, route optimization, persistence, and presentation of the result. It also represents the alternative flow for an unauthorized user.
+## Route Algorithm (Pseudocode)
+
+The route-generation service creates routes from approved collection requests while respecting request priority, travel distance, and vehicle capacity.
+
+```text
+INPUT:
+    approved_requests
+    available_vehicles
+    suitable_facilities
+
+FOR each available vehicle:
+    remaining_capacity = vehicle.capacity - vehicle.current_load
+    current_location = vehicle.start_location
+    pending_requests = approved requests eligible for assignment
+
+    SORT pending_requests by priority (highest first)
+
+    WHILE pending_requests is not empty:
+        next_request = nearest eligible request
+                      among the highest-priority pending requests
+
+        IF next_request would exceed remaining_capacity:
+            facility = nearest suitable facility
+                       with sufficient remaining capacity
+
+            IF facility exists:
+                ADD facility to route
+                UPDATE current_location to facility.location
+                UPDATE vehicle load and remaining capacity
+                CONTINUE route planning
+            ELSE:
+                STOP route planning before vehicle capacity is exceeded
+                ALERT administrator that no suitable facility is available
+                BREAK
+
+        ADD next_request to route
+        UPDATE current_location to next_request.location
+        UPDATE remaining_capacity
+        REMOVE next_request from pending_requests
+
+    SAVE the valid route and its ordered stops
+
+OUTPUT:
+    generated routes and any required administrator alerts
+```
+
+**Algorithm notes:**
+- Request priority is considered before distance; nearest-next selection is applied among eligible requests at the highest priority.
+- Vehicle capacity is checked before assigning a collection that could exceed the limit.
+- A facility detour is permitted only when a suitable facility has sufficient remaining capacity.
+- If no suitable facility is available, route planning stops safely and the administrator is alerted.
