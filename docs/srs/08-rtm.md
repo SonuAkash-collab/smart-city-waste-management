@@ -36,3 +36,21 @@ This matrix links every requirement ID in this SRS to the design component that 
 | SCW-F-030 | Admin adds facility: location, accepted waste types, daily capacity | Facility Service | TC-FAC-02 |
 | SCW-F-031 | Operator records incoming waste (vehicle, weight); remaining capacity updates | Facility Service | TC-FAC-01 |
 | SCW-F-032 | Facilities that are full or don't accept the waste type are excluded | Facility Service | TC-FAC-01 |
+
+### 8.5 Route Generation
+
+| Req ID | Description | Design component (SAD 3.8) | Test case(s) |
+|---|---|---|---|
+| SCW-F-040 | Admin generates routes for a date from all Approved requests | Route Optimization Engine | TC-RT-01 |
+| SCW-F-041 | Stops ordered by priority first, then shortest distance | Route Optimization Engine | TC-RT-01 |
+| SCW-F-042 | Vehicle load never exceeds capacity; when full, route goes to the nearest suitable facility | Route Optimization Engine | TC-RT-02, TC-RT-04 |
+| SCW-F-043 | Driver views assigned route as ordered stops on a map | Route Optimization Engine | TC-RT-03 |
+| SCW-F-044 | Driver marks each stop Collected/Missed; request status updates automatically | Route Optimization Engine | TC-RT-03 |
+
+### 8.6 Notifications & Reports
+
+| Req ID | Description | Design component (SAD 3.8) | Test case(s) |
+|---|---|---|---|
+| SCW-F-050 | Citizen is notified (in-app/email) on every status change | Notification & Reporting Service | TC-NOT-01 |
+| SCW-F-051 | Admin dashboard: pending requests, active vehicles, facility capacity | Notification & Reporting Service | TC-RPT-01 |
+| SCW-F-052 | Admin exports daily collection report as CSV | Notification & Reporting Service | TC-RPT-01 |
