@@ -77,3 +77,16 @@ This matrix links every requirement ID in this SRS to the design component that 
 | SCW-SEC-004 | Role checks enforced on the server for every API call | Auth & User Service | TC-SEC-02, TC-AUTH-02 |
 | SCW-SEC-005 | Account locked for 15 minutes after 5 consecutive failed logins | Auth & User Service | TC-SEC-01 |
 | SCW-SEC-006 | All admin actions (approve/reject, route generation, account changes) written to an audit log | Auth & User Service | TC-SEC-04 |
+
+### 8.9 Coverage Summary
+
+| Category | Requirement IDs | IDs with at least one test case | Coverage |
+|---|---|---|---|
+| Functional (SCW-F) | 23 | 23 | 100% |
+| Non-functional (SCW-NF) | 5 | 5 | 100% |
+| Security objectives (SCW-SO) | 2 | 2 (through security requirement test cases) | 100% |
+| Security requirements (SCW-SEC) | 6 | 6 | 100% |
+| **Total** | **36** | **36** | **100%** |
+
+- Every one of the 36 requirement IDs maps to a design component in SAD Section 3.8 and to at least one of the 26 test cases in the Test Plan.
+- Every test case traces back to at least one requirement ID (Test Plan Section 13.3).
