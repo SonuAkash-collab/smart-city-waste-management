@@ -30,7 +30,7 @@ end
 deactivate Request
 
 note over Web,Request
-  The optional photo's representation and transfer mechanism
-  are not specified by the project documents.
+  The optional photo is represented as base64 in the JSON request
+  and is associated with the saved request.
 end note
 @enduml
