@@ -54,3 +54,26 @@ This matrix links every requirement ID in this SRS to the design component that 
 | SCW-F-050 | Citizen is notified (in-app/email) on every status change | Notification & Reporting Service | TC-NOT-01 |
 | SCW-F-051 | Admin dashboard: pending requests, active vehicles, facility capacity | Notification & Reporting Service | TC-RPT-01 |
 | SCW-F-052 | Admin exports daily collection report as CSV | Notification & Reporting Service | TC-RPT-01 |
+
+### 8.7 Non-Functional Requirements
+
+| Req ID | Description | Design component (SAD 3.8) | Test case(s) |
+|---|---|---|---|
+| SCW-NF-001 | Route generation completes in ≤ 10 s for 200 requests and 20 vehicles | Route Optimization Engine | TC-PERF-01 |
+| SCW-NF-002 | 95% of API responses ≤ 2 s with 100 concurrent users | All services (Auth & User, Request, Fleet, Facility, Route Optimization Engine, Notification & Reporting) | TC-PERF-01, TC-PERF-02 |
+| SCW-NF-003 | ≥ 99% monthly availability | All services | TC-AVL-01 |
+| SCW-NF-004 | A first-time citizen can submit a request in ≤ 3 minutes without training; UI works on screens ≥ 360 px wide | Web Frontend | TC-USE-01 |
+| SCW-NF-005 | Modular services; ≥ 70% unit-test coverage of the service layer | All services | TC-MNT-01 |
+
+### 8.8 Security Objectives and Requirements
+
+| Req ID | Description | Design component (SAD 3.8) | Test case(s) |
+|---|---|---|---|
+| SCW-SO-1 | Objective: confidentiality of user personal data and home locations | Auth & User Service | TC-SEC-01, TC-SEC-02, TC-SEC-03, TC-AUTH-02 (via SCW-SEC-001 – SCW-SEC-005) |
+| SCW-SO-2 | Objective: integrity and accountability of request, route and facility data | All services | TC-SEC-02, TC-AUTH-02, TC-SEC-04 (via SCW-SEC-004, SCW-SEC-006) |
+| SCW-SEC-001 | Passwords stored only as bcrypt hashes | Auth & User Service | TC-SEC-01 |
+| SCW-SEC-002 | JWT access tokens expire after 30 minutes | Auth & User Service | TC-SEC-02 |
+| SCW-SEC-003 | All traffic over HTTPS (TLS 1.2+) | Web Frontend | TC-SEC-03 |
+| SCW-SEC-004 | Role checks enforced on the server for every API call | Auth & User Service | TC-SEC-02, TC-AUTH-02 |
+| SCW-SEC-005 | Account locked for 15 minutes after 5 consecutive failed logins | Auth & User Service | TC-SEC-01 |
+| SCW-SEC-006 | All admin actions (approve/reject, route generation, account changes) written to an audit log | Auth & User Service | TC-SEC-04 |
