@@ -1,100 +1,127 @@
-# 5. Test Approach
+# Test Approach
 
-**Project:** Smart City Waste Management System  
-**Version:** 1.0  
-**Authors:** Team 04  
-**Date:** 10-10-2026  
-**Status:** Draft
+## 1. Testing Strategy
 
-## 5.1 Testing Strategy
+Testing will verify that the Smart City Waste Management System satisfies its functional requirements, non-functional requirements, security requirements, and documented error-handling behavior.
 
-The testing strategy verifies that the Smart City Waste Management System satisfies its specified functional and non-functional requirements. Testing will focus on route generation, stop ordering, vehicle capacity enforcement, driver route operations, and performance.
+The testing strategy combines:
 
-Tests will be designed from the requirements registry and executed using documented preconditions, test data, steps, expected results, actual results, and execution status.
+- **Unit testing:** Validate individual service functions and business rules.
+- **Integration testing:** Verify interactions between the FastAPI backend, PostgreSQL database, and connected services.
+- **Functional testing:** Validate request processing, route generation, vehicle capacity, facility selection, driver workflows, and reporting.
+- **Security testing:** Verify authentication, role-based authorization, password handling, token expiration, HTTPS, and audit logging.
+- **Performance testing:** Measure route-generation time and API response times under the specified workloads.
+- **Usability testing:** Measure how quickly first-time users can submit a request on mobile and desktop screens.
+- **Availability testing:** Monitor health-check results over a continuous 24-hour test window.
 
-## 5.2 Testing Levels
+## 2. Test Environment
 
-| Testing Level | Purpose | Example |
-|---|---|---|
-| Unit Testing | Verify individual functions and service-layer logic in isolation. | Test stop-ordering rules and vehicle-capacity calculations. |
-| Integration Testing | Verify interactions between services and the database. | Verify retrieval of approved requests and persistence of generated routes. |
-| System Testing | Verify end-to-end behavior across the integrated application. | Generate a route and confirm that the ordered stops are available to the driver. |
-| Acceptance Testing | Verify that implemented behavior meets the documented requirements and stakeholder expectations. | Confirm route ordering, capacity handling, and driver status updates against their acceptance criteria. |
+- **Frontend:** React application, tested in a desktop browser and at a mobile viewport width of 360 CSS pixels.
+- **Backend:** FastAPI application running in a test environment.
+- **Database:** PostgreSQL test database containing controlled test data.
+- **Unit testing and coverage:** Pytest and pytest-cov.
+- **Load testing:** Locust.
+- **API validation:** FastAPI endpoints tested using automated requests or an API client.
+- **Route and map testing:** Use controlled request, vehicle, facility, capacity, and location data. Verify route decisions independently of external map-service availability wherever possible.
 
-## 5.3 Testing Types
+Tests must use test data and must not modify production records.
 
-| Testing Type | Purpose |
-|---|---|
-| Functional Testing | Verify route generation, stop ordering, capacity handling, driver route viewing, and collection-status updates. |
-| Performance Testing | Measure route-generation time and API response times under the specified workloads. |
-| Regression Testing | Re-run relevant tests after changes to ensure that existing behavior remains correct. |
-| Security Testing | Verify authentication and authorization behavior relevant to protected route and driver operations. |
-| Usability Testing | Assess whether the relevant workflows can be completed clearly by their intended users. |
+## 3. Functional Test Approach
 
-## 5.4 Test Cases and Coverage
+Functional tests will verify the following behaviors:
 
-| Test Case | Requirements Covered | Objective |
-|---|---|---|
-| TC-RT-01 | SCW-F-040, SCW-F-041 | Verify route generation from approved requests and ordering by priority followed by shortest distance. |
-| TC-RT-02 | SCW-F-042, SCW-F-023 | Verify that vehicle capacity is never exceeded and that a full vehicle is directed to a suitable disposal facility. |
-| TC-RT-03 | SCW-F-043, SCW-F-044 | Verify driver route viewing, collection outcome recording, and automatic request-status updates. |
-| TC-PERF-01 | SCW-NF-001, SCW-NF-002 | Verify route-generation and API response-time targets. |
+1. Request submission, validation, and status changes.
+2. Route generation from approved requests.
+3. Stop ordering by priority and then nearest-next distance.
+4. Vehicle capacity enforcement and diversion to a suitable facility.
+5. Driver access to assigned routes and the ability to mark stops as Collected or Missed.
+6. Facility and vehicle registration, validation, and status handling.
+7. Dashboard counts and daily collection CSV exports.
+8. Correct handling of invalid input, unauthorized access, unavailable facilities, and other documented error conditions.
 
-## 5.5 Test Environment and Tools
+Expected results must be derived from the requirements registry and the corresponding test case. A test must not introduce a new business rule that has not been approved and documented.
 
-Testing should use a controlled environment with the application services, PostgreSQL database, representative test data, and access to the map integration where required.
+## 4. Non-Functional Test Approach
 
-Potential tools include:
+### 4.1 Route-generation performance
 
-- **Pytest:** Unit and automated service-level tests, where applicable.
-- **Postman:** API request and response verification.
-- **Locust or JMeter:** Load and performance testing.
-- **Browser developer tools:** Inspection of frontend behavior and API communication.
+Use a controlled dataset containing 200 approved requests and 20 vehicles. Measure route-generation duration from the request to generate routes until a successful result is returned. The target is **10 seconds or less**.
 
-The actual tools and environment used must be recorded during test execution.
+### 4.2 API performance
 
-## 5.6 Entry Criteria
+Use Locust to simulate **100 concurrent users**. Record API response times and calculate the percentage of measured API calls completed within 2 seconds. The acceptance criterion is **at least 95%**.
 
-Testing may begin when:
+### 4.3 Availability
 
-- The relevant functionality is available in the test environment.
-- Required test data and accounts are prepared.
-- The applicable requirements and test cases are documented.
-- Required services and database dependencies are accessible.
+Perform a health check every **1 minute for a continuous 24-hour window**. Calculate uptime as:
 
-## 5.7 Exit Criteria
+`successful health checks / total scheduled health checks × 100`
 
-Testing is considered complete for a test case when its steps have been executed and the actual results have been recorded.
+The acceptance criterion is **at least 99% uptime** during the measurement window. A health check is successful only when the configured health endpoint returns the expected healthy response. Record failed checks and investigate their causes.
 
-The assigned test scope is ready for review when:
+### 4.4 Usability
 
-- All planned test cases have an execution status.
-- Failures and deviations are documented.
-- Relevant defects are recorded for follow-up.
-- Performance results are compared with their specified targets.
+Recruit **five first-time users** who have not received task-specific training. Each participant must submit a request on both a desktop layout and a mobile layout with a viewport width of **360 CSS pixels**. Measure elapsed time from the start of the task to successful submission. Each participant must complete each attempt in **3 minutes or less**.
 
-Passing results must not be reported until supported by actual test execution.
+Record completion time, success or failure, and any usability issue. Do not count a failed submission as a successful result.
 
-## 5.8 Security Validation
+### 4.5 Maintainability and code coverage
 
-Security validation should include the following checks where the corresponding functionality is available:
+Run `pytest --cov` against the backend service layer using the project's configured test suite and coverage source. The service layer must achieve **at least 70% statement coverage**. Record the command, test result, and coverage report. Coverage alone does not prove that all requirements are correctly implemented.
 
-- Verify that protected endpoints reject unauthenticated requests.
-- Verify that users without the required role cannot access protected administrative operations.
-- Verify that input validation rejects invalid route-generation parameters.
-- Verify that sensitive information is not exposed in error responses.
-- Verify HTTPS and other security controls according to the project's security requirements and test plan.
+## 5. Security Test Approach
 
-## 5.9 Defect Reporting and Retesting
+Security tests will verify:
 
-When actual results differ from expected results:
+- Passwords are stored as bcrypt hashes rather than plaintext.
+- Accounts are locked for 15 minutes after five consecutive failed login attempts.
+- JWT access tokens expire after 30 minutes.
+- Protected endpoints reject missing, invalid, malformed, or expired tokens.
+- Server-side role checks prevent unauthorized access.
+- HTTPS uses TLS 1.2 or later.
+- Required administrative actions are recorded in audit logs.
 
-1. Record the test case ID and relevant requirement IDs.
-2. Describe the observed behavior and expected behavior.
-3. Capture reproducible steps and relevant evidence.
-4. Report the issue for correction.
-5. Re-run the affected test after a fix and record the new result.
+Security tests must be performed in the test environment using test accounts. Results must be recorded against the corresponding security requirements and test cases.
 
-## 5.10 Traceability
+## 6. Test Data and Execution
 
-Test cases must retain the requirement IDs defined in the authoritative requirements registry. Any proposed changes to requirement or test case IDs must be coordinated with the project lead before updating the related documents.
+Prepare controlled test records for citizens, requests, vehicles, drivers, facilities, capacities, route assignments, and collections.
+
+For repeatable tests:
+
+1. Record the preconditions and required test data.
+2. Execute the documented steps.
+3. Compare actual results with expected results.
+4. Capture relevant API responses, logs, timing measurements, or reports.
+5. Record the result as **Pass**, **Fail**, or **Blocked** after execution. Before execution, retain the status **Not run**.
+6. Record defects with reproduction steps, expected behavior, actual behavior, and supporting evidence.
+
+Performance and availability results must include the measurement window, workload, total observations, failures, and calculated acceptance metric.
+
+## 7. Entry and Exit Criteria
+
+### Entry criteria
+
+- The relevant application build is available in the test environment.
+- Required configuration and test data are prepared.
+- Dependencies needed for the test are accessible.
+- Test cases and expected results are documented.
+- The test environment is separated from production.
+
+### Exit criteria
+
+- All planned test cases have an explicitly recorded status.
+- Failed and blocked tests have documented explanations and associated defects where applicable.
+- Required functional and non-functional acceptance criteria have been evaluated.
+- Performance, availability, usability, and coverage evidence has been recorded for the relevant tests.
+- Outstanding defects and limitations are reported to the project team.
+
+A test plan or test case must not be reported as passed solely because it has been documented. Acceptance is based on recorded execution evidence.
+
+## 8. Traceability and Reporting
+
+Map every test case to its corresponding requirement ID in `docs/requirements-registry.md`. Keep the features-to-test mapping and requirement verification references synchronized with the actual test cases.
+
+Any new or changed requirement, acceptance threshold, or business rule must be reviewed with the project lead and reflected in the authoritative requirements registry before the traceability mapping is treated as final.
+
+Test reports will summarize test coverage, execution status, failures, defects, measured results, and any unmet acceptance criteria.
