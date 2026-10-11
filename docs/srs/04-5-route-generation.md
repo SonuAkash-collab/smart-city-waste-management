@@ -18,3 +18,42 @@
 - Vehicle capacity and disposal-facility compatibility and remaining capacity shall be checked during route generation.
 - Drivers shall only access their assigned routes and update their assigned stops.
 - Requirement IDs and test case references shall remain consistent with `docs/requirements-registry.md`.
+## Worked Example: Route Generation
+
+### Scenario
+
+An administrator generates a collection route for one vehicle using three approved collection requests and one suitable facility.
+
+**Vehicle and facility details**
+
+| Item | Details |
+|---|---|
+| Vehicle | V1 |
+| Vehicle maximum capacity | 1,000 kg |
+| Initial vehicle load | 0 kg |
+| Facility | F1 |
+| Facility remaining capacity | 2,000 kg |
+
+**Collection requests**
+
+| Request | Priority | Location | Waste quantity |
+|---|---|---|---:|
+| R1 | High | Location A | 300 kg |
+| R2 | Medium | Location B | 250 kg |
+| R3 | Low | Location C | 200 kg |
+
+The example assumes that all three requests are approved, eligible for assignment to V1, and can be collected without exceeding the vehicle's capacity.
+
+### Route-generation steps
+
+1. The system retrieves the three approved requests and sorts them by priority: R1, R2, then R3.
+2. The system assigns R1 first. The vehicle load becomes 300 kg.
+3. The system assigns R2 next. The vehicle load becomes 550 kg.
+4. The system assigns R3 next. The vehicle load becomes 750 kg.
+5. The system checks the resulting load against the vehicle's 1,000 kg maximum capacity. Since 750 kg is within capacity, no facility detour is required for capacity reasons.
+
+### Expected result
+
+The resulting collection order is R1 → R2 → R3, subject to the documented priority and distance-ordering rules. The vehicle's planned load is 750 kg, leaving 250 kg of unused capacity.
+
+This example illustrates basic priority ordering and capacity validation. If requests have equal priority, nearest-next distance determines their order. If the vehicle needs a facility detour, the system must select the nearest suitable facility with sufficient remaining capacity. If no suitable facility is available, route planning must stop before the vehicle exceeds its capacity and the administrator must be alerted.
