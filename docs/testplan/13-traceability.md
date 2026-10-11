@@ -68,9 +68,9 @@ Every requirement ID has at least one dedicated test case. Security objectives (
 |---|---|---|---|
 | TC-AUTH-01 | SCW-F-001 | Functional | Sonu Akash |
 | TC-AUTH-02 | SCW-F-002, SCW-SEC-004 | Security | Sonu Akash |
-| TC-ADM-01 | SCW-F-003 | Functional | Sonu Akash |
+| TC-ADM-01 | SCW-F-003 | Functional | Rishit V N S |
 | TC-NOT-01 | SCW-F-050 | Functional | Sonu Akash |
-| TC-RPT-01 | SCW-F-051, SCW-F-052 | Functional | Sonu Akash |
+| TC-RPT-01 | SCW-F-051, SCW-F-052 | Functional | Rottela Haritej |
 | TC-REQ-01 | SCW-F-010 | Functional | Rishit V N S |
 | TC-REQ-02 | SCW-F-011 | Functional | Rishit V N S |
 | TC-REQ-03 | SCW-F-012, SCW-F-013 | Functional | Rishit V N S |
