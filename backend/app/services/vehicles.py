@@ -1,10 +1,11 @@
 
-"""Business logic for vehicle management."""
+"""Business logic for vehicle management and driver assignment."""
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.models.user import User, UserRole
 from app.models.vehicle import Vehicle, VehicleStatus
 from app.schemas.vehicles import VehicleCreate, VehicleUpdate
 
@@ -15,6 +16,14 @@ class VehicleNotFoundError(Exception):
 
 class VehicleConflictError(Exception):
     """Raised when a vehicle operation conflicts with existing data."""
+
+
+class DriverNotFoundError(Exception):
+    """Raised when the requested driver does not exist."""
+
+
+class InvalidDriverError(Exception):
+    """Raised when a user is not eligible to be a driver."""
 
 
 def list_vehicles(db: Session) -> list[Vehicle]:
@@ -56,7 +65,9 @@ def create_vehicle(db: Session, data: VehicleCreate) -> Vehicle:
         db.refresh(vehicle)
     except IntegrityError as exc:
         db.rollback()
-        raise VehicleConflictError("Registration number already exists") from exc
+        raise VehicleConflictError(
+            "Registration number already exists"
+        ) from exc
 
     return vehicle
 
@@ -93,6 +104,35 @@ def update_vehicle(
         db.refresh(vehicle)
     except IntegrityError as exc:
         db.rollback()
-        raise VehicleConflictError("Vehicle update conflicts with existing data") from exc
+        raise VehicleConflictError(
+            "Vehicle update conflicts with existing data"
+        ) from exc
+
+    return vehicle
+
+
+def assign_driver(
+    db: Session,
+    vehicle_id: int,
+    driver_id: int,
+) -> Vehicle:
+    """Assign an active driver to an existing vehicle."""
+    vehicle = db.get(Vehicle, vehicle_id)
+    if vehicle is None:
+        raise VehicleNotFoundError("Vehicle not found")
+
+    driver = db.get(User, driver_id)
+    if driver is None:
+        raise DriverNotFoundError("Driver not found")
+
+    if driver.role != UserRole.DRIVER:
+        raise InvalidDriverError("User does not have the DRIVER role")
+
+    if not driver.is_active:
+        raise InvalidDriverError("Driver is inactive")
+
+    vehicle.driver_id = driver.id
+    db.commit()
+    db.refresh(vehicle)
 
     return vehicle

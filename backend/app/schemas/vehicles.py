@@ -1,7 +1,5 @@
 
-"""Pydantic schemas for vehicle creation, updates, and responses."""
-
-
+"""Pydantic schemas for vehicle management and driver assignment."""
 
 from pydantic import (
     BaseModel,
@@ -113,3 +111,9 @@ class VehicleRead(BaseModel):
     depot_longitude: float
     status: VehicleStatus
     driver_id: int | None
+
+
+class DriverAssignmentRequest(BaseModel):
+    """Validate a driver assignment request."""
+
+    driver_id: int = Field(gt=0)
