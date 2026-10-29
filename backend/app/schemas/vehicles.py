@@ -1,7 +1,15 @@
 
 """Pydantic schemas for vehicle creation, updates, and responses."""
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from app.models.vehicle import VehicleStatus
 
@@ -45,6 +53,24 @@ class VehicleUpdate(BaseModel):
     depot_latitude: float | None = Field(default=None, ge=-90, le=90)
     depot_longitude: float | None = Field(default=None, ge=-180, le=180)
     status: VehicleStatus | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_explicit_nulls(cls, data: object) -> object:
+        """Reject null for supplied fields while allowing omitted fields."""
+        if isinstance(data, dict):
+            non_nullable_fields = {
+                "registration_number",
+                "capacity_kg",
+                "waste_types",
+                "depot_latitude",
+                "depot_longitude",
+                "status",
+            }
+            for field in non_nullable_fields:
+                if field in data and data[field] is None:
+                    raise ValueError(f"{field} cannot be null")
+        return data
 
     @field_validator("registration_number")
     @classmethod
