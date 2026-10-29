@@ -1,0 +1,49 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from app import models  # noqa: F401  (registers tables on Base.metadata)
+from app.db import Base, engine
+from app.routers import (
+    audit,
+    auth,
+    dashboard,
+    facilities,
+    geo,
+    notifications,
+    reports,
+    requests,
+    routes,
+    security,
+    users,
+    vehicles,
+)
+
+API_PREFIX = "/api/v1"
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(title="Smart City Waste Management System", version="1.0", lifespan=lifespan)
+
+app.include_router(auth.router, prefix=API_PREFIX)
+app.include_router(users.router, prefix=API_PREFIX)
+app.include_router(notifications.router, prefix=API_PREFIX)
+app.include_router(reports.router, prefix=API_PREFIX)
+app.include_router(dashboard.router, prefix=API_PREFIX)
+app.include_router(requests.router, prefix=API_PREFIX)
+app.include_router(routes.router, prefix=API_PREFIX)
+app.include_router(geo.router, prefix=API_PREFIX)
+app.include_router(vehicles.router, prefix=API_PREFIX)
+app.include_router(facilities.router, prefix=API_PREFIX)
+app.include_router(audit.router, prefix=API_PREFIX)
+app.include_router(security.router, prefix=API_PREFIX)
+
+
+@app.get("/health", tags=["health"])
+def health():
+    return {"status": "ok"}
