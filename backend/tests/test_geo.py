@@ -43,3 +43,27 @@ def test_different_coordinates_return_positive_distance():
     )
 
     assert distance > 0
+
+@pytest.mark.parametrize("latitude", [-91, 91])
+def test_invalid_latitude_raises_value_error(latitude):
+    with pytest.raises(ValueError, match="Latitude"):
+        haversine_distance(latitude, 0, 0, 0)
+
+
+@pytest.mark.parametrize("longitude", [-181, 181])
+def test_invalid_longitude_raises_value_error(longitude):
+    with pytest.raises(ValueError, match="Longitude"):
+        haversine_distance(0, longitude, 0, 0)
+
+
+@pytest.mark.parametrize("latitude", [-90, 90])
+def test_latitude_boundaries_are_valid(latitude):
+    distance = haversine_distance(latitude, 0, 0, 0)
+    assert distance >= 0
+
+
+@pytest.mark.parametrize("longitude", [-180, 180])
+def test_longitude_boundaries_are_valid(longitude):
+    distance = haversine_distance(0, longitude, 0, 0)
+    assert distance >= 0
+ 
