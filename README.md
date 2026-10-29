@@ -66,6 +66,34 @@ Manage waste collection requests, vehicles and disposal facilities. Generate eff
 └── README.md        Project overview
 ```
 
+## How to run
+
+The backend lives in `backend/`. Python 3.11 or newer is required.
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env             # Windows: copy .env.example .env
+```
+
+Start the API (tables are created on startup in the database named by `DATABASE_URL`, default `sqlite:///./app.db`):
+
+```bash
+uvicorn app.main:app --reload
+```
+
+- Health check: http://127.0.0.1:8000/health
+- Swagger docs: http://127.0.0.1:8000/docs
+
+Run the tests (they use an in-memory SQLite database):
+
+```bash
+pytest
+pytest --cov=app    # with coverage
+```
+
 ## Project Deliverables
 
 | Document                     | Status      |
