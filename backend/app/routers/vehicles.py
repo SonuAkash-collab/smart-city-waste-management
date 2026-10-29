@@ -1,14 +1,22 @@
 
-"""API endpoints for vehicle management."""
+"""API endpoints for vehicle management and driver assignment."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.schemas.vehicles import VehicleCreate, VehicleRead, VehicleUpdate
+from app.schemas.vehicles import (
+    DriverAssignmentRequest,
+    VehicleCreate,
+    VehicleRead,
+    VehicleUpdate,
+)
 from app.services.vehicles import (
+    DriverNotFoundError,
+    InvalidDriverError,
     VehicleConflictError,
     VehicleNotFoundError,
+    assign_driver,
     create_vehicle,
     get_vehicle,
     list_vehicles,
@@ -31,18 +39,24 @@ def get_vehicle_by_id(vehicle_id: int, db: Session = Depends(get_db)):
         return get_vehicle(db, vehicle_id)
     except VehicleNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
         ) from exc
 
 
-@router.post("/", response_model=VehicleRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=VehicleRead,
+    status_code=status.HTTP_201_CREATED,
+)
 def add_vehicle(data: VehicleCreate, db: Session = Depends(get_db)):
     """Create a vehicle."""
     try:
         return create_vehicle(db, data)
     except VehicleConflictError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
         ) from exc
 
 
@@ -57,9 +71,44 @@ def edit_vehicle(
         return update_vehicle(db, vehicle_id, data)
     except VehicleNotFoundError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
         ) from exc
     except VehicleConflictError as exc:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail=str(exc)
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
         ) from exc
+
+
+@router.patch("/{vehicle_id}/driver")
+def assign_vehicle_driver(
+    vehicle_id: int,
+    data: DriverAssignmentRequest,
+    db: Session = Depends(get_db),
+):
+    """Assign an active driver to a vehicle."""
+    try:
+        vehicle = assign_driver(db, vehicle_id, data.driver_id)
+    except VehicleNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except DriverNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except InvalidDriverError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
+
+    return {
+        "vehicle_id": vehicle.id,
+        "registration_number": vehicle.registration_number,
+        "driver_id": vehicle.driver_id,
+        "message": "Driver assigned successfully",
+    }
