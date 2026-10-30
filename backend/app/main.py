@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app import models  # noqa: F401  (registers tables on Base.metadata)
+from app.core.errors import register_error_handlers
 from app.db import Base, engine
 from app.routers import (
     audit,
@@ -29,6 +30,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="Smart City Waste Management System", version="1.0", lifespan=lifespan)
+register_error_handlers(app)
 
 app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(users.router, prefix=API_PREFIX)
