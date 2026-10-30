@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, Float, ForeignKey, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db import Base
@@ -50,6 +50,8 @@ class CollectionRequest(Base):
     priority: Mapped[Priority] = mapped_column(
         Enum(Priority, native_enum=False, length=20), default=Priority.MEDIUM
     )
+    priority_overridden: Mapped[bool] = mapped_column(Boolean, default=False)
+    priority_escalated: Mapped[bool] = mapped_column(Boolean, default=False)
     reason: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
