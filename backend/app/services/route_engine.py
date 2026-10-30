@@ -15,7 +15,7 @@ Rules
 * When the next stop would overflow a vehicle, it detours to the nearest
   facility that accepts every waste type on board and has enough remaining
   capacity, unloads, and carries on. If no facility qualifies, that route
-  stops there.
+  stops there and an admin alert is raised.
 * At the end of a route a loaded vehicle goes to the nearest suitable
   facility to unload.
 * Requests that no vehicle can take are returned in ``unassigned`` with a
@@ -205,11 +205,24 @@ class _VehicleState:
         self.on_board.add(request.waste_type)
         self.add_stop(COLLECTION, request.latitude, request.longitude, request_id=request.id)
 
-    def unload(self, facilities, remaining) -> bool:
+    def unload(self, facilities, remaining, alerts: list[AdminAlert]) -> bool:
         facility = nearest_facility(
             facilities, remaining, self.on_board, self.load, self.latitude, self.longitude
         )
         if facility is None:
+            types = tuple(sorted(self.on_board))
+            alerts.append(
+                AdminAlert(
+                    vehicle_id=self.vehicle.id,
+                    load_kg=round(self.load, 3),
+                    waste_types=types,
+                    message=(
+                        f"Vehicle {self.vehicle.id} carries {self.load:.0f} kg "
+                        f"({', '.join(types)}) and no facility can take it. "
+                        "Its route stops here until an admin acts."
+                    ),
+                )
+            )
             self.active = False
             self.stopped = True
             return False
@@ -253,7 +266,7 @@ def plan_routes(
                 continue
             if state.load + nxt.quantity_kg > state.vehicle.capacity_kg:
                 # The next stop would overflow the vehicle: unload first (SCW-F-042).
-                state.unload(facilities, remaining)
+                state.unload(facilities, remaining, plan.alerts)
                 continue
             pending.remove(nxt)
             state.collect(nxt)
@@ -261,7 +274,7 @@ def plan_routes(
     for state in states:
         # A route that ends with waste on board finishes at a facility.
         if state.load > 0 and not state.stopped and state.route.stops:
-            state.unload(facilities, remaining)
+            state.unload(facilities, remaining, plan.alerts)
         if state.route.stops:
             plan.routes.append(state.route)
 
