@@ -18,6 +18,10 @@ class VehicleConflictError(Exception):
     """Raised when a vehicle operation conflicts with existing data."""
 
 
+class VehicleOverloadError(Exception):
+    """Raised when a load would go above the vehicle's capacity."""
+
+
 class DriverAlreadyAssignedError(Exception):
     """Raised when a driver already drives another vehicle."""
 
@@ -148,4 +152,36 @@ def assign_driver(
     db.commit()
     db.refresh(vehicle)
 
+    return vehicle
+
+
+def add_load(db: Session, vehicle_id: int, weight_kg: float) -> Vehicle:
+    """Record collected waste on a vehicle (SCW-F-023).
+
+    The load can never go above the vehicle's capacity.
+    """
+    vehicle = get_vehicle(db, vehicle_id)
+    if weight_kg < 0:
+        raise ValueError("Weight cannot be negative")
+    new_load = vehicle.current_load_kg + weight_kg
+    if new_load > vehicle.capacity_kg + 1e-9:
+        raise VehicleOverloadError(
+            f"Vehicle {vehicle.registration_number} would carry {new_load:.0f} kg "
+            f"but its capacity is {vehicle.capacity_kg:.0f} kg"
+        )
+    vehicle.current_load_kg = round(new_load, 3)
+    db.commit()
+    db.refresh(vehicle)
+    return vehicle
+
+
+def unload(db: Session, vehicle_id: int, weight_kg: float | None = None) -> Vehicle:
+    """Remove waste from a vehicle at a facility; no weight means unload everything."""
+    vehicle = get_vehicle(db, vehicle_id)
+    if weight_kg is None:
+        vehicle.current_load_kg = 0.0
+    else:
+        vehicle.current_load_kg = round(max(0.0, vehicle.current_load_kg - weight_kg), 3)
+    db.commit()
+    db.refresh(vehicle)
     return vehicle
