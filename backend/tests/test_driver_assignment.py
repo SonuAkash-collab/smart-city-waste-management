@@ -10,7 +10,7 @@ def create_vehicle(db_session):
         registration_number="KA01AB1234",
         capacity_kg=1000,
         current_load_kg=0,
-        waste_types=["GENERAL"],
+        waste_types=["MIXED"],
         depot_latitude=12.9716,
         depot_longitude=77.5946,
         status=VehicleStatus.AVAILABLE,
@@ -47,9 +47,8 @@ def test_assign_active_driver_successfully(client, db_session):
     )
 
     assert response.status_code == 200
-    assert response.json()["vehicle_id"] == vehicle.id
-    assert response.json()["driver_id"] == driver.id
-    assert response.json()["message"] == "Driver assigned successfully"
+    assert response.json()["id"] == vehicle.id
+    assert response.json()["driverId"] == driver.id
 
 
 def test_assign_driver_to_missing_vehicle_returns_404(client, db_session):
