@@ -97,3 +97,31 @@ def distance_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def priority_rank(priority: str) -> int:
     return PRIORITY_RANK.get(priority, len(PRIORITY_RANK))
+
+
+def pick_next(
+    candidates: list[RequestInput], latitude: float, longitude: float
+) -> RequestInput | None:
+    """Highest priority first, then the nearest request; ties go to the lower id."""
+    if not candidates:
+        return None
+    best_rank = min(priority_rank(r.priority) for r in candidates)
+    tier = [r for r in candidates if priority_rank(r.priority) == best_rank]
+    return min(
+        tier,
+        key=lambda r: (distance_km(latitude, longitude, r.latitude, r.longitude), r.id),
+    )
+
+
+def order_stops(
+    requests: list[RequestInput], latitude: float, longitude: float
+) -> list[RequestInput]:
+    """Visiting order for one vehicle with room for everything (SCW-F-041)."""
+    remaining = list(requests)
+    ordered: list[RequestInput] = []
+    while remaining:
+        nxt = pick_next(remaining, latitude, longitude)
+        ordered.append(nxt)
+        remaining.remove(nxt)
+        latitude, longitude = nxt.latitude, nxt.longitude
+    return ordered
