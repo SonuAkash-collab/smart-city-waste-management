@@ -99,6 +99,11 @@ def priority_rank(priority: str) -> int:
     return PRIORITY_RANK.get(priority, len(PRIORITY_RANK))
 
 
+def can_carry(vehicle: VehicleInput, request: RequestInput) -> bool:
+    """True when the vehicle takes this waste type and the load fits when empty."""
+    return request.waste_type in vehicle.waste_types and request.quantity_kg <= vehicle.capacity_kg
+
+
 def pick_next(
     candidates: list[RequestInput], latitude: float, longitude: float
 ) -> RequestInput | None:
@@ -125,3 +130,63 @@ def order_stops(
         remaining.remove(nxt)
         latitude, longitude = nxt.latitude, nxt.longitude
     return ordered
+
+
+class _VehicleState:
+    """A vehicle's position, load and route while the plan is being built."""
+
+    def __init__(self, vehicle: VehicleInput):
+        self.vehicle = vehicle
+        self.route = PlannedRoute(vehicle_id=vehicle.id)
+        self.latitude = vehicle.depot_latitude
+        self.longitude = vehicle.depot_longitude
+        self.load = vehicle.current_load_kg
+        self.on_board: set[str] = set()
+        self.active = True
+
+    def add_stop(self, stop_type, latitude, longitude, request_id=None, facility_id=None):
+        leg = distance_km(self.latitude, self.longitude, latitude, longitude)
+        self.route.stops.append(
+            PlannedStop(
+                sequence=len(self.route.stops) + 1,
+                stop_type=stop_type,
+                latitude=latitude,
+                longitude=longitude,
+                load_after_kg=round(self.load, 3),
+                distance_km=round(leg, 3),
+                request_id=request_id,
+                facility_id=facility_id,
+            )
+        )
+        self.latitude, self.longitude = latitude, longitude
+
+    def collect(self, request: RequestInput) -> None:
+        self.load += request.quantity_kg
+        self.on_board.add(request.waste_type)
+        self.add_stop(COLLECTION, request.latitude, request.longitude, request_id=request.id)
+
+
+def plan_routes(requests: list[RequestInput], vehicles: list[VehicleInput]) -> RoutePlan:
+    """Build one route per vehicle that has work.
+
+    Vehicles take turns picking their next stop so the work is spread over the
+    fleet. A vehicle whose next stop would overflow it ends its route.
+    """
+    plan = RoutePlan()
+    pending = sorted(requests, key=lambda r: r.id)
+    states = [_VehicleState(v) for v in sorted(vehicles, key=lambda v: v.id)]
+
+    while any(state.active for state in states):
+        for state in states:
+            if not state.active:
+                continue
+            candidates = [r for r in pending if can_carry(state.vehicle, r)]
+            nxt = pick_next(candidates, state.latitude, state.longitude)
+            if nxt is None or state.load + nxt.quantity_kg > state.vehicle.capacity_kg:
+                state.active = False
+                continue
+            pending.remove(nxt)
+            state.collect(nxt)
+
+    plan.routes = [state.route for state in states if state.route.stops]
+    return plan
