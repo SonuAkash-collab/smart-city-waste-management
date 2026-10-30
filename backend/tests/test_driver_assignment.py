@@ -110,3 +110,29 @@ def test_assign_driver_rejects_invalid_driver_id(client):
     )
 
     assert response.status_code == 422
+
+
+def test_driver_cannot_drive_two_vehicles(client, db_session, make_user):
+    """Reject assigning a driver who already drives another vehicle (TC-VEH-02 step 5)."""
+    first = create_vehicle(db_session)
+    second = Vehicle(
+        registration_number="KA02CD5678",
+        capacity_kg=800,
+        current_load_kg=0,
+        waste_types=["MIXED"],
+        depot_latitude=12.9716,
+        depot_longitude=77.5946,
+        status=VehicleStatus.AVAILABLE,
+    )
+    db_session.add(second)
+    db_session.commit()
+    driver = make_user(UserRole.DRIVER)
+
+    assert client.patch(f"/api/v1/vehicles/{first.id}/driver", json={"driver_id": driver.id}).status_code == 200
+    again = client.patch(f"/api/v1/vehicles/{first.id}/driver", json={"driver_id": driver.id})
+    assert again.status_code == 200  # same vehicle again is fine
+
+    response = client.patch(f"/api/v1/vehicles/{second.id}/driver", json={"driver_id": driver.id})
+    assert response.status_code == 409
+    db_session.refresh(second)
+    assert second.driver_id is None

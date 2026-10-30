@@ -18,6 +18,10 @@ class VehicleConflictError(Exception):
     """Raised when a vehicle operation conflicts with existing data."""
 
 
+class DriverAlreadyAssignedError(Exception):
+    """Raised when a driver already drives another vehicle."""
+
+
 class DriverNotFoundError(Exception):
     """Raised when the requested driver does not exist."""
 
@@ -130,6 +134,15 @@ def assign_driver(
 
     if not driver.is_active:
         raise InvalidDriverError("Driver is inactive")
+
+    # One driver drives at most one vehicle at a time.
+    other = db.scalar(
+        select(Vehicle).where(Vehicle.driver_id == driver.id, Vehicle.id != vehicle.id)
+    )
+    if other is not None:
+        raise DriverAlreadyAssignedError(
+            f"Driver is already assigned to vehicle {other.registration_number}"
+        )
 
     vehicle.driver_id = driver.id
     db.commit()
