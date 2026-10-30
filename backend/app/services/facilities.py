@@ -10,6 +10,7 @@ from app.models.facility import Facility, FacilityIntake
 from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.schemas.facilities import FacilityCreate, FacilityUpdate, IntakeCreate
+from app.services.route_engine import FacilityInput
 
 
 def today() -> date:
@@ -146,3 +147,41 @@ def list_intakes(db: Session, facility_id: int, day: date | None = None) -> list
             .order_by(FacilityIntake.recorded_at)
         ).all()
     )
+
+
+def suitable_facilities(
+    db: Session, waste_types: set[str], load_kg: float, day: date | None = None
+) -> list[Facility]:
+    """Facilities that accept every given waste type and have room for the load (SCW-F-032).
+
+    Full facilities, facilities that do not take one of the waste types, and
+    facilities with less remaining capacity than the load are left out.
+    """
+    day = day or today()
+    return [
+        facility
+        for facility in list_facilities(db)
+        if waste_types.issubset(facility.accepted_waste_types)
+        and remaining_capacity(db, facility, day) >= load_kg
+        and remaining_capacity(db, facility, day) > 0
+    ]
+
+
+def routing_facilities(db: Session, day: date | None = None) -> list[FacilityInput]:
+    """Facilities with capacity left on ``day``, in the form the route engine reads."""
+    day = day or today()
+    inputs = []
+    for facility in list_facilities(db):
+        remaining = remaining_capacity(db, facility, day)
+        if remaining <= 0:
+            continue
+        inputs.append(
+            FacilityInput(
+                id=facility.id,
+                latitude=facility.latitude,
+                longitude=facility.longitude,
+                accepted_waste_types=tuple(facility.accepted_waste_types),
+                remaining_capacity_kg=remaining,
+            )
+        )
+    return inputs
