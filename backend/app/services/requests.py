@@ -1,11 +1,17 @@
 """Business logic for collection requests (SCW-F-010 to SCW-F-014)."""
 
+import base64
+import binascii
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.errors import ApiError
 from app.models.collection_request import CollectionRequest, Priority, RequestStatus, WasteType
+from app.models.user import User
+from app.schemas.requests import RequestCreate
+from app.services.notifications import notify
 
 # SCW-F-011: priority from waste type.
 PRIORITY_BY_WASTE_TYPE = {
@@ -62,3 +68,53 @@ def escalate_waiting_requests(db: Session, now: datetime | None = None) -> int:
     if changed:
         db.commit()
     return changed
+
+
+def announce_status(db: Session, request: CollectionRequest) -> None:
+    """Tell the owner about the request's current status (SCW-F-050)."""
+    when = as_utc(request.updated_at or request.created_at or utcnow())
+    notify(
+        db,
+        request.citizen_id,
+        f"Request #{request.id}: status is now {request.status.value} "
+        f"({when:%Y-%m-%d %H:%M} UTC).",
+    )
+
+
+def _check_photo(photo: str) -> None:
+    data = photo.split(",", 1)[1] if photo.startswith("data:") else photo
+    try:
+        base64.b64decode(data, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ApiError(422, "INVALID_PHOTO", "The photo must be a base64-encoded image.") from exc
+
+
+def create_request(db: Session, citizen: User, data: RequestCreate) -> CollectionRequest:
+    """Store a new request with its starting priority (SCW-F-010, SCW-F-011)."""
+    if data.latitude is None or data.longitude is None:
+        raise ApiError(
+            422,
+            "LOCATION_REQUIRED",
+            "Pin the location on the map or enter an address we can find.",
+        )
+    if data.photo:
+        _check_photo(data.photo)
+    now = utcnow()
+    request = CollectionRequest(
+        citizen_id=citizen.id,
+        latitude=data.latitude,
+        longitude=data.longitude,
+        address=data.address,
+        waste_type=data.waste_type,
+        estimated_quantity_kg=data.estimated_quantity_kg,
+        photo=data.photo,
+        status=RequestStatus.SUBMITTED,
+        priority=initial_priority(data.waste_type),
+        created_at=now,
+        updated_at=now,
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+    announce_status(db, request)
+    return request
