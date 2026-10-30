@@ -3,12 +3,11 @@ from datetime import date
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import require_roles
+from app.core.deps import get_current_user, require_roles
 from app.db import get_db
-from app.core.deps import get_current_user
 from app.models.collection_request import Priority, RequestStatus, WasteType
 from app.models.user import User, UserRole
-from app.schemas.requests import RequestCreate, RequestCreated, RequestPage
+from app.schemas.requests import RequestCreate, RequestCreated, RequestDetail, RequestPage
 from app.services import requests as request_service
 
 router = APIRouter(prefix="/requests", tags=["requests"])
@@ -40,3 +39,13 @@ def list_requests(
         db, user, status_filter, priority, waste_type, on_date, page, size
     )
     return {"items": items, "page": page, "size": size, "total": total}
+
+
+@router.get("/{request_id}", response_model=RequestDetail)
+def get_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """The full request for its owner or an Admin."""
+    return request_service.get_request_for(db, user, request_id)
