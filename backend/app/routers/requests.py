@@ -7,7 +7,14 @@ from app.core.deps import get_current_user, require_roles
 from app.db import get_db
 from app.models.collection_request import Priority, RequestStatus, WasteType
 from app.models.user import User, UserRole
-from app.schemas.requests import RequestCreate, RequestCreated, RequestDetail, RequestPage
+from app.schemas.requests import (
+    RequestCreate,
+    RequestCreated,
+    RequestDetail,
+    RequestPage,
+    StatusUpdate,
+    StatusUpdated,
+)
 from app.services import requests as request_service
 
 router = APIRouter(prefix="/requests", tags=["requests"])
@@ -49,3 +56,13 @@ def get_request(
 ):
     """The full request for its owner or an Admin."""
     return request_service.get_request_for(db, user, request_id)
+
+
+@router.patch(
+    "/{request_id}/status",
+    response_model=StatusUpdated,
+    dependencies=[Depends(require_roles(UserRole.ADMIN))],
+)
+def decide_request(request_id: int, data: StatusUpdate, db: Session = Depends(get_db)):
+    """Admin approves or rejects a request, optionally overriding its priority."""
+    return request_service.decide(db, request_id, data)
