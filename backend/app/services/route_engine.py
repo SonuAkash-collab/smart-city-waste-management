@@ -166,6 +166,15 @@ class _VehicleState:
         self.add_stop(COLLECTION, request.latitude, request.longitude, request_id=request.id)
 
 
+def _reason(request: RequestInput, vehicles: list[VehicleInput]) -> str:
+    takes_type = [v for v in vehicles if request.waste_type in v.waste_types]
+    if not takes_type:
+        return NO_COMPATIBLE_VEHICLE
+    if all(request.quantity_kg > v.capacity_kg for v in takes_type):
+        return TOO_LARGE
+    return NO_CAPACITY
+
+
 def plan_routes(requests: list[RequestInput], vehicles: list[VehicleInput]) -> RoutePlan:
     """Build one route per vehicle that has work.
 
@@ -189,4 +198,5 @@ def plan_routes(requests: list[RequestInput], vehicles: list[VehicleInput]) -> R
             state.collect(nxt)
 
     plan.routes = [state.route for state in states if state.route.stops]
+    plan.unassigned = [UnassignedRequest(r.id, _reason(r, vehicles)) for r in pending]
     return plan
