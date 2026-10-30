@@ -8,6 +8,7 @@ from app.db import get_db
 from app.models.collection_request import Priority, RequestStatus, WasteType
 from app.models.user import User, UserRole
 from app.schemas.requests import (
+    CancelResult,
     RequestCreate,
     RequestCreated,
     RequestDetail,
@@ -66,3 +67,13 @@ def get_request(
 def decide_request(request_id: int, data: StatusUpdate, db: Session = Depends(get_db)):
     """Admin approves or rejects a request, optionally overriding its priority."""
     return request_service.decide(db, request_id, data)
+
+
+@router.delete("/{request_id}", response_model=CancelResult)
+def cancel_request(
+    request_id: int,
+    db: Session = Depends(get_db),
+    citizen: User = Depends(require_roles(UserRole.CITIZEN)),
+):
+    """Citizen cancels their request before it is Scheduled (SCW-F-013)."""
+    return request_service.cancel(db, citizen, request_id)
