@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app import models  # noqa: F401  (registers tables on Base.metadata)
 from app.core.errors import register_error_handlers
@@ -49,3 +51,10 @@ app.include_router(security.router, prefix=API_PREFIX)
 @app.get("/health", tags=["health"])
 def health():
     return {"status": "ok"}
+
+
+# The web app (frontend/) is served from the same server, so one command runs
+# everything. It is mounted last so the API routes above take priority.
+FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
+if FRONTEND_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="web")
