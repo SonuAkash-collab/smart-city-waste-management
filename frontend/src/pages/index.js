@@ -1,5 +1,6 @@
 // Every page of the app: its path, menu label and which roles may open it.
 // `roles: null` means anyone, signed in or not. Paths may contain :params.
+import Staff from './admin/Staff.js';
 import Login from './auth/Login.js';
 import Register from './auth/Register.js';
 import Home from './Home.js';
@@ -12,6 +13,7 @@ export const pages = [
   { path: '/register', component: Register, label: 'Register', roles: null, guestOnly: true },
   { path: '/requests/new', component: SubmitRequest, label: 'Request pickup', roles: ['CITIZEN'] },
   { path: '/admin/requests', component: AdminRequests, label: 'Requests', roles: ['ADMIN'] },
+  { path: '/admin/staff', component: Staff, label: 'Staff', roles: ['ADMIN'] },
 ];
 
 function match(pattern, path) {
