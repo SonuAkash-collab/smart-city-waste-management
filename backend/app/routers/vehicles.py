@@ -4,7 +4,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.deps import require_roles
 from app.db import get_db
+from app.models.user import UserRole
 from app.schemas.vehicles import (
     DriverAssignmentRequest,
     VehicleCreate,
@@ -24,7 +26,12 @@ from app.services.vehicles import (
     update_vehicle,
 )
 
-router = APIRouter(prefix="/vehicles", tags=["vehicles"])
+# Vehicle management and driver assignment are Admin-only (SCW-F-020, SCW-F-022).
+router = APIRouter(
+    prefix="/vehicles",
+    tags=["vehicles"],
+    dependencies=[Depends(require_roles(UserRole.ADMIN))],
+)
 
 
 @router.get("/", response_model=list[VehicleRead])

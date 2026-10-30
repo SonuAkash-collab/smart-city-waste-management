@@ -1,7 +1,15 @@
 """Tests for assigning drivers to vehicles."""
 
+import pytest
+
 from app.models.user import User, UserRole
 from app.models.vehicle import Vehicle, VehicleStatus
+
+
+@pytest.fixture(autouse=True)
+def as_admin(client, admin_headers):
+    """Vehicle endpoints are Admin-only, so these tests call them as an Admin."""
+    client.headers.update(admin_headers)
 
 
 def create_vehicle(db_session):

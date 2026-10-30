@@ -1,7 +1,15 @@
 
 """Tests for vehicle management endpoints."""
 
+import pytest
+
 from app.models.vehicle import Vehicle
+
+
+@pytest.fixture(autouse=True)
+def as_admin(client, admin_headers):
+    """Vehicle endpoints are Admin-only, so these tests call them as an Admin."""
+    client.headers.update(admin_headers)
 
 
 def vehicle_payload():
