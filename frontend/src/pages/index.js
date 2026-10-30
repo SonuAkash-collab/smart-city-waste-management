@@ -1,9 +1,11 @@
 // Every page of the app: its path, menu label and which roles may open it.
 // `roles: null` means anyone, signed in or not. Paths may contain :params.
 import Home from './Home.js';
+import SubmitRequest from './requests/SubmitRequest.js';
 
 export const pages = [
   { path: '/', component: Home, label: 'Home', roles: null, menu: false },
+  { path: '/requests/new', component: SubmitRequest, label: 'Request pickup', roles: ['CITIZEN'] },
 ];
 
 function match(pattern, path) {
