@@ -207,3 +207,25 @@ def decide(db: Session, request_id: int, data: StatusUpdate) -> CollectionReques
     if status_changed:
         announce_status(db, request)
     return request
+
+
+CANCELLABLE = (RequestStatus.SUBMITTED, RequestStatus.APPROVED)
+
+
+def cancel(db: Session, citizen: User, request_id: int) -> CollectionRequest:
+    """A Citizen cancels their own request before it is Scheduled (SCW-F-013)."""
+    request = get_request(db, request_id)
+    if request.citizen_id != citizen.id:
+        raise ApiError(403, "FORBIDDEN", "You can only cancel your own requests.")
+    if request.status not in CANCELLABLE:
+        raise ApiError(
+            409,
+            "CANNOT_CANCEL",
+            f"This request is {request.status.value} and can no longer be cancelled.",
+        )
+    request.status = RequestStatus.CANCELLED
+    request.updated_at = utcnow()
+    db.commit()
+    db.refresh(request)
+    announce_status(db, request)
+    return request
