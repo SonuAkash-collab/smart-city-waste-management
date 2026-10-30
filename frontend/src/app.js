@@ -1,4 +1,5 @@
 import { html, ReactDOM, useEffect, useState } from './lib.js';
+import Login from './pages/auth/Login.js';
 import { findPage, pages } from './pages/index.js';
 import { clearSession, getUser } from './session.js';
 
@@ -27,8 +28,16 @@ function useRoute() {
   return { path, user };
 }
 
-function menuItems() {
-  return pages.filter((page) => page.menu !== false);
+// Each role only sees its own menu items (SCW-F-002). The server still checks
+// every call, so hiding a link is never the only protection.
+export function canOpen(page, user) {
+  if (page.guestOnly) return !user;
+  if (!page.roles) return true;
+  return Boolean(user) && page.roles.includes(user.role);
+}
+
+function menuItems(user) {
+  return pages.filter((page) => page.menu !== false && canOpen(page, user));
 }
 
 function Header({ user, path }) {
@@ -50,7 +59,7 @@ function Header({ user, path }) {
       </div>`}
     </header>
     <nav class="menu" aria-label="Main menu">
-      ${menuItems().map(
+      ${menuItems(user).map(
         (item) =>
           html`<a key=${item.path} href=${'#' + item.path} class=${path === item.path ? 'active' : ''}
             >${item.label}</a
@@ -60,6 +69,11 @@ function Header({ user, path }) {
   `;
 }
 
+function Forbidden() {
+  return html`<section class="card"><h2>Not available for your role</h2>
+    <p class="muted">This page belongs to another type of account.</p><p><a href="#/">Go home</a></p></section>`;
+}
+
 function NotFound() {
   return html`<section class="card"><h2>Page not found</h2><p><a href="#/">Go home</a></p></section>`;
 }
@@ -67,7 +81,10 @@ function NotFound() {
 function App() {
   const { path, user } = useRoute();
   const found = findPage(path);
-  const Page = found ? found.page.component : NotFound;
+  let Page = found ? found.page.component : NotFound;
+  if (found && found.page.roles && !user) Page = Login;
+  else if (found && found.page.guestOnly && user) Page = pages[0].component;
+  else if (found && !canOpen(found.page, user)) Page = Forbidden;
   return html`
     <${Header} user=${user} path=${path} />
     <main class="content">
