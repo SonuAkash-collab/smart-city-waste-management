@@ -2,14 +2,14 @@
 
 import base64
 import binascii
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
 from app.models.collection_request import CollectionRequest, Priority, RequestStatus, WasteType
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.requests import RequestCreate
 from app.services.notifications import notify
 
@@ -118,3 +118,44 @@ def create_request(db: Session, citizen: User, data: RequestCreate) -> Collectio
     db.refresh(request)
     announce_status(db, request)
     return request
+
+
+def _db_time(db: Session, value: datetime) -> datetime:
+    """SQLite keeps naive UTC datetimes; other databases keep the time zone."""
+    return value.replace(tzinfo=None) if db.get_bind().dialect.name == "sqlite" else value
+
+
+def list_requests(
+    db: Session,
+    user: User,
+    status: RequestStatus | None = None,
+    priority: Priority | None = None,
+    waste_type: WasteType | None = None,
+    on_date: date | None = None,
+    page: int = 1,
+    size: int = 20,
+) -> tuple[list[CollectionRequest], int]:
+    """Filter and page requests (SCW-F-014). Citizens only see their own."""
+    escalate_waiting_requests(db)
+    query = select(CollectionRequest)
+    if user.role != UserRole.ADMIN:
+        query = query.where(CollectionRequest.citizen_id == user.id)
+    if status is not None:
+        query = query.where(CollectionRequest.status == status)
+    if priority is not None:
+        query = query.where(CollectionRequest.priority == priority)
+    if waste_type is not None:
+        query = query.where(CollectionRequest.waste_type == waste_type)
+    if on_date is not None:
+        start = datetime.combine(on_date, time.min, tzinfo=timezone.utc)
+        query = query.where(
+            CollectionRequest.created_at >= _db_time(db, start),
+            CollectionRequest.created_at < _db_time(db, start + timedelta(days=1)),
+        )
+    total = db.scalar(select(func.count()).select_from(query.subquery()))
+    items = db.scalars(
+        query.order_by(CollectionRequest.created_at.desc(), CollectionRequest.id.desc())
+        .offset((page - 1) * size)
+        .limit(size)
+    ).all()
+    return list(items), total
