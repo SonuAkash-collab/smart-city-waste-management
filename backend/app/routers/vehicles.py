@@ -12,6 +12,7 @@ from app.schemas.vehicles import (
     VehicleUpdate,
 )
 from app.services.vehicles import (
+    DriverAlreadyAssignedError,
     DriverNotFoundError,
     InvalidDriverError,
     VehicleConflictError,
@@ -103,6 +104,11 @@ def assign_vehicle_driver(
     except InvalidDriverError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
+    except DriverAlreadyAssignedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
 
