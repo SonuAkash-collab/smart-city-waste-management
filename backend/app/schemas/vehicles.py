@@ -2,17 +2,35 @@
 """Pydantic schemas for vehicle management and driver assignment."""
 
 from pydantic import (
-    BaseModel,
-    ConfigDict,
     Field,
     field_validator,
     model_validator,
 )
 
+from app.models.collection_request import WasteType
 from app.models.vehicle import VehicleStatus
+from app.schemas.base import CamelModel
+
+KNOWN_WASTE_TYPES = {waste.value for waste in WasteType}
 
 
-class VehicleCreate(BaseModel):
+def clean_waste_types(values: list[str]) -> list[str]:
+    """Upper-case, de-duplicate and check waste types against the agreed list."""
+    cleaned: list[str] = []
+    for value in values:
+        value = value.strip().upper()
+        if not value:
+            raise ValueError("Waste types cannot be empty")
+        if value not in KNOWN_WASTE_TYPES:
+            raise ValueError(
+                f"Unknown waste type {value}; use one of {', '.join(sorted(KNOWN_WASTE_TYPES))}"
+            )
+        if value not in cleaned:
+            cleaned.append(value)
+    return cleaned
+
+
+class VehicleCreate(CamelModel):
     """Validate data required to create a vehicle."""
 
     registration_number: str = Field(min_length=1, max_length=20)
@@ -33,14 +51,11 @@ class VehicleCreate(BaseModel):
     @field_validator("waste_types")
     @classmethod
     def validate_waste_types(cls, values: list[str]) -> list[str]:
-        """Reject empty waste type values."""
-        normalized = [value.strip() for value in values]
-        if any(not value for value in normalized):
-            raise ValueError("Waste types cannot be empty")
-        return normalized
+        """Accept only the agreed waste types."""
+        return clean_waste_types(values)
 
 
-class VehicleUpdate(BaseModel):
+class VehicleUpdate(CamelModel):
     """Validate fields that can be updated on an existing vehicle."""
 
     registration_number: str | None = Field(
@@ -66,8 +81,12 @@ class VehicleUpdate(BaseModel):
                 "status",
             }
             for field in non_nullable_fields:
-                if field in data and data[field] is None:
-                    raise ValueError(f"{field} cannot be null")
+                camel = "".join(
+                    part.capitalize() if i else part for i, part in enumerate(field.split("_"))
+                )
+                for key in (field, camel):
+                    if key in data and data[key] is None:
+                        raise ValueError(f"{camel} cannot be null")
         return data
 
     @field_validator("registration_number")
@@ -88,19 +107,14 @@ class VehicleUpdate(BaseModel):
     def validate_waste_types(
         cls, values: list[str] | None
     ) -> list[str] | None:
-        """Reject empty waste type values."""
+        """Accept only the agreed waste types."""
         if values is None:
             return None
-        normalized = [value.strip() for value in values]
-        if any(not value for value in normalized):
-            raise ValueError("Waste types cannot be empty")
-        return normalized
+        return clean_waste_types(values)
 
 
-class VehicleRead(BaseModel):
+class VehicleRead(CamelModel):
     """Represent a vehicle in API responses."""
-
-    model_config = ConfigDict(from_attributes=True)
 
     id: int
     registration_number: str
@@ -113,7 +127,7 @@ class VehicleRead(BaseModel):
     driver_id: int | None
 
 
-class DriverAssignmentRequest(BaseModel):
+class DriverAssignmentRequest(CamelModel):
     """Validate a driver assignment request."""
 
     driver_id: int = Field(gt=0)

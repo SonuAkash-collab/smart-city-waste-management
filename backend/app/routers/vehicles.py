@@ -82,7 +82,7 @@ def edit_vehicle(
         ) from exc
 
 
-@router.patch("/{vehicle_id}/driver")
+@router.patch("/{vehicle_id}/driver", response_model=VehicleRead)
 def assign_vehicle_driver(
     vehicle_id: int,
     data: DriverAssignmentRequest,
@@ -90,7 +90,7 @@ def assign_vehicle_driver(
 ):
     """Assign an active driver to a vehicle."""
     try:
-        vehicle = assign_driver(db, vehicle_id, data.driver_id)
+        return assign_driver(db, vehicle_id, data.driver_id)
     except VehicleNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -111,10 +111,3 @@ def assign_vehicle_driver(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
-
-    return {
-        "vehicle_id": vehicle.id,
-        "registration_number": vehicle.registration_number,
-        "driver_id": vehicle.driver_id,
-        "message": "Driver assigned successfully",
-    }
