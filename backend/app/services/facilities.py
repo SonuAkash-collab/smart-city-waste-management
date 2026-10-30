@@ -11,6 +11,7 @@ from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.schemas.facilities import FacilityCreate, FacilityUpdate, IntakeCreate
 from app.services.route_engine import FacilityInput
+from app.services.vehicles import unload
 
 
 def today() -> date:
@@ -130,6 +131,8 @@ def record_intake(
     db.add(intake)
     db.commit()
     db.refresh(intake)
+    # The delivered waste leaves the vehicle (SCW-F-023).
+    unload(db, data.vehicle_id, data.weight_kg)
     return intake, round(remaining - data.weight_kg, 3)
 
 
