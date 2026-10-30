@@ -27,6 +27,10 @@ def _admin_only(user: User = Depends(require_roles(UserRole.ADMIN))):
 
 
 app.include_router(_probe)
+# Move the probe first so the web app mounted at "/" does not catch it.
+for _route in [r for r in app.router.routes if getattr(r, "path", "") == "/_test/admin-only"]:
+    app.router.routes.remove(_route)
+    app.router.routes.insert(0, _route)
 
 
 def login(client, email, password=DEFAULT_PASSWORD):
