@@ -159,3 +159,19 @@ def list_requests(
         .limit(size)
     ).all()
     return list(items), total
+
+
+def get_request(db: Session, request_id: int) -> CollectionRequest:
+    request = db.get(CollectionRequest, request_id)
+    if request is None:
+        raise ApiError(404, "REQUEST_NOT_FOUND", "Request not found.")
+    return request
+
+
+def get_request_for(db: Session, user: User, request_id: int) -> CollectionRequest:
+    """Return a request to its owner or an Admin (SCW-F-012)."""
+    escalate_waiting_requests(db)
+    request = get_request(db, request_id)
+    if user.role != UserRole.ADMIN and request.citizen_id != user.id:
+        raise ApiError(403, "FORBIDDEN", "You can only view your own requests.")
+    return request
