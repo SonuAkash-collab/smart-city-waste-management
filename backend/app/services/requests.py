@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import ApiError
 from app.models.collection_request import CollectionRequest, Priority, RequestStatus, WasteType
 from app.models.user import User, UserRole
-from app.schemas.requests import RequestCreate
+from app.schemas.requests import RequestCreate, StatusUpdate
 from app.services.notifications import notify
 
 # SCW-F-011: priority from waste type.
@@ -174,4 +174,36 @@ def get_request_for(db: Session, user: User, request_id: int) -> CollectionReque
     request = get_request(db, request_id)
     if user.role != UserRole.ADMIN and request.citizen_id != user.id:
         raise ApiError(403, "FORBIDDEN", "You can only view your own requests.")
+    return request
+
+
+# Which statuses an Admin decision may start from.
+DECISION_ALLOWED_FROM = {
+    RequestStatus.APPROVED: {RequestStatus.SUBMITTED, RequestStatus.APPROVED},
+    RequestStatus.REJECTED: {RequestStatus.SUBMITTED, RequestStatus.APPROVED},
+}
+
+
+def decide(db: Session, request_id: int, data: StatusUpdate) -> CollectionRequest:
+    """Admin approves or rejects a request and may override its priority (SCW-F-011, SCW-F-014)."""
+    request = get_request(db, request_id)
+    target = RequestStatus(data.status)
+    if request.status not in DECISION_ALLOWED_FROM[target]:
+        raise ApiError(
+            409,
+            "INVALID_STATUS_TRANSITION",
+            f"A {request.status.value} request cannot be {target.value.lower()}.",
+        )
+    status_changed = request.status != target
+    request.status = target
+    if data.priority is not None:
+        request.priority = data.priority
+        request.priority_overridden = True
+    if data.reason is not None:
+        request.reason = data.reason
+    request.updated_at = utcnow()
+    db.commit()
+    db.refresh(request)
+    if status_changed:
+        announce_status(db, request)
     return request
