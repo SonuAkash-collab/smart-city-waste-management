@@ -7,7 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
 from app.models.facility import Facility, FacilityIntake
-from app.schemas.facilities import FacilityCreate, FacilityUpdate
+from app.models.user import User
+from app.models.vehicle import Vehicle
+from app.schemas.facilities import FacilityCreate, FacilityUpdate, IntakeCreate
 
 
 def today() -> date:
@@ -86,3 +88,61 @@ def update_facility(db: Session, facility_id: int, data: FacilityUpdate) -> Faci
     db.commit()
     db.refresh(facility)
     return facility
+
+
+def record_intake(
+    db: Session, facility_id: int, operator: User, data: IntakeCreate
+) -> tuple[FacilityIntake, float]:
+    """Operator records a delivery; returns the intake and the remaining capacity (SCW-F-031).
+
+    The facility row is locked while the check and insert run, so two
+    deliveries at the same time cannot go over the daily capacity.
+    """
+    facility = db.scalar(select(Facility).where(Facility.id == facility_id).with_for_update())
+    if facility is None:
+        raise ApiError(404, "FACILITY_NOT_FOUND", "Facility not found.")
+    if db.get(Vehicle, data.vehicle_id) is None:
+        raise ApiError(422, "UNKNOWN_VEHICLE", "No registered vehicle has this id.")
+    if data.waste_type.value not in facility.accepted_waste_types:
+        raise ApiError(
+            422,
+            "WASTE_TYPE_NOT_ACCEPTED",
+            f"{facility.name} does not accept {data.waste_type.value} waste.",
+        )
+    now = datetime.now(timezone.utc)
+    remaining = remaining_capacity(db, facility, now.date())
+    if data.weight_kg > remaining:
+        db.rollback()
+        raise ApiError(
+            409,
+            "CAPACITY_EXCEEDED",
+            f"Only {remaining:.0f} kg of capacity is left today.",
+        )
+    intake = FacilityIntake(
+        facility_id=facility.id,
+        vehicle_id=data.vehicle_id,
+        operator_id=operator.id,
+        waste_type=data.waste_type,
+        weight_kg=data.weight_kg,
+        recorded_at=now,
+    )
+    db.add(intake)
+    db.commit()
+    db.refresh(intake)
+    return intake, round(remaining - data.weight_kg, 3)
+
+
+def list_intakes(db: Session, facility_id: int, day: date | None = None) -> list[FacilityIntake]:
+    get_facility(db, facility_id)
+    start = datetime.combine(day or today(), time.min, tzinfo=timezone.utc)
+    return list(
+        db.scalars(
+            select(FacilityIntake)
+            .where(
+                FacilityIntake.facility_id == facility_id,
+                FacilityIntake.recorded_at >= _db_time(db, start),
+                FacilityIntake.recorded_at < _db_time(db, start + timedelta(days=1)),
+            )
+            .order_by(FacilityIntake.recorded_at)
+        ).all()
+    )
