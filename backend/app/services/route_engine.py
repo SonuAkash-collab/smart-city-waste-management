@@ -3,6 +3,23 @@
 This module is pure Python: it takes plain data in and returns a plan out.
 It does not touch the database or the API, so it is easy to test and fast
 enough for 200 requests and 20 vehicles (SCW-NF-001).
+
+Rules
+-----
+* Only the vehicles passed in are used; the caller passes AVAILABLE ones.
+* A vehicle only collects waste types listed in its ``waste_types``.
+* Vehicles take turns picking their next stop, so the work is spread over
+  the fleet. Each pick is the highest-priority request first (HIGH, MEDIUM,
+  LOW) and then the nearest one to the vehicle's current position.
+* The planned load never goes above the vehicle's capacity.
+* When the next stop would overflow a vehicle, it detours to the nearest
+  facility that accepts every waste type on board and has enough remaining
+  capacity, unloads, and carries on. If no facility qualifies, that route
+  stops there.
+* At the end of a route a loaded vehicle goes to the nearest suitable
+  facility to unload.
+* Requests that no vehicle can take are returned in ``unassigned`` with a
+  reason, and stay APPROVED for the next run.
 """
 
 from dataclasses import dataclass, field
@@ -132,6 +149,28 @@ def order_stops(
     return ordered
 
 
+def nearest_facility(
+    facilities: list[FacilityInput],
+    remaining: dict[int, float],
+    waste_types: set[str],
+    load_kg: float,
+    latitude: float,
+    longitude: float,
+) -> FacilityInput | None:
+    """Nearest facility that accepts every waste type on board and has room (SCW-F-032)."""
+    suitable = [
+        f
+        for f in facilities
+        if waste_types.issubset(f.accepted_waste_types) and remaining[f.id] >= load_kg
+    ]
+    if not suitable:
+        return None
+    return min(
+        suitable,
+        key=lambda f: (distance_km(latitude, longitude, f.latitude, f.longitude), f.id),
+    )
+
+
 class _VehicleState:
     """A vehicle's position, load and route while the plan is being built."""
 
@@ -143,6 +182,7 @@ class _VehicleState:
         self.load = vehicle.current_load_kg
         self.on_board: set[str] = set()
         self.active = True
+        self.stopped = False
 
     def add_stop(self, stop_type, latitude, longitude, request_id=None, facility_id=None):
         leg = distance_km(self.latitude, self.longitude, latitude, longitude)
@@ -165,6 +205,20 @@ class _VehicleState:
         self.on_board.add(request.waste_type)
         self.add_stop(COLLECTION, request.latitude, request.longitude, request_id=request.id)
 
+    def unload(self, facilities, remaining) -> bool:
+        facility = nearest_facility(
+            facilities, remaining, self.on_board, self.load, self.latitude, self.longitude
+        )
+        if facility is None:
+            self.active = False
+            self.stopped = True
+            return False
+        remaining[facility.id] -= self.load
+        self.load = 0.0
+        self.on_board.clear()
+        self.add_stop(FACILITY, facility.latitude, facility.longitude, facility_id=facility.id)
+        return True
+
 
 def _reason(request: RequestInput, vehicles: list[VehicleInput]) -> str:
     takes_type = [v for v in vehicles if request.waste_type in v.waste_types]
@@ -175,28 +229,41 @@ def _reason(request: RequestInput, vehicles: list[VehicleInput]) -> str:
     return NO_CAPACITY
 
 
-def plan_routes(requests: list[RequestInput], vehicles: list[VehicleInput]) -> RoutePlan:
-    """Build one route per vehicle that has work.
-
-    Vehicles take turns picking their next stop so the work is spread over the
-    fleet. A vehicle whose next stop would overflow it ends its route.
-    """
+def plan_routes(
+    requests: list[RequestInput],
+    vehicles: list[VehicleInput],
+    facilities: list[FacilityInput] | None = None,
+) -> RoutePlan:
+    """Build one route per vehicle that has work."""
     plan = RoutePlan()
+    facilities = list(facilities or [])
+    remaining = {f.id: f.remaining_capacity_kg for f in facilities}
     pending = sorted(requests, key=lambda r: r.id)
     states = [_VehicleState(v) for v in sorted(vehicles, key=lambda v: v.id)]
 
+    # Vehicles take turns: each turn a vehicle collects one stop or unloads.
     while any(state.active for state in states):
         for state in states:
             if not state.active:
                 continue
             candidates = [r for r in pending if can_carry(state.vehicle, r)]
             nxt = pick_next(candidates, state.latitude, state.longitude)
-            if nxt is None or state.load + nxt.quantity_kg > state.vehicle.capacity_kg:
+            if nxt is None:
                 state.active = False
+                continue
+            if state.load + nxt.quantity_kg > state.vehicle.capacity_kg:
+                # The next stop would overflow the vehicle: unload first (SCW-F-042).
+                state.unload(facilities, remaining)
                 continue
             pending.remove(nxt)
             state.collect(nxt)
 
-    plan.routes = [state.route for state in states if state.route.stops]
+    for state in states:
+        # A route that ends with waste on board finishes at a facility.
+        if state.load > 0 and not state.stopped and state.route.stops:
+            state.unload(facilities, remaining)
+        if state.route.stops:
+            plan.routes.append(state.route)
+
     plan.unassigned = [UnassignedRequest(r.id, _reason(r, vehicles)) for r in pending]
     return plan
