@@ -1,12 +1,13 @@
 import { baseMap } from './MapPicker.js';
 import { html, L, useEffect, useRef } from '../lib.js';
 
-const COLORS = ['#1f7a4d', '#1d5fa8', '#b45309', '#7c3aed', '#be123c', '#0f766e'];
+// One colour per route; the routes page uses the same list for its colour keys.
+export const COLORS = ['#1d6b47', '#1f5d9e', '#c26a00', '#7c3aed', '#be123c', '#0f766e'];
 
 function stopIcon(stop, color) {
   const done = stop.status !== 'PENDING';
   const label = stop.stopType === 'FACILITY' ? 'F' : String(stop.sequence);
-  const background = stop.status === 'MISSED' ? '#b42318' : done ? '#8a9690' : color;
+  const background = stop.status === 'MISSED' ? '#b8322a' : done ? '#8a9690' : color;
   return L.divIcon({
     className: 'stop-pin',
     html: `<span style="background:${background}">${label}</span>`,
