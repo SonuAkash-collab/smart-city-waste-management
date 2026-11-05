@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import require_roles
 from app.db import get_db
 from app.models.user import User, UserRole
-from app.schemas.routes import GenerateResult, GenerateRoutes, RouteOut
+from app.schemas.routes import GenerateResult, GenerateRoutes, RouteOut, StopUpdate, StopUpdated
 from app.services import routes as route_service
 
 router = APIRouter(prefix="/routes", tags=["routes"])
@@ -48,3 +48,15 @@ def assigned_routes(
 def get_route(route_id: int, db: Session = Depends(get_db), user: User = Depends(admin_or_driver)):
     """One route with its ordered stops."""
     return route_service.describe_route(db, route_service.get_route_for(db, user, route_id))
+
+
+@router.patch("/{route_id}/stops/{stop_id}", response_model=StopUpdated)
+def update_stop(
+    route_id: int,
+    stop_id: int,
+    data: StopUpdate,
+    db: Session = Depends(get_db),
+    driver: User = Depends(require_roles(UserRole.DRIVER)),
+):
+    """The route's driver marks a stop Collected or Missed (SCW-F-044)."""
+    return route_service.update_stop(db, driver, route_id, stop_id, data.status)

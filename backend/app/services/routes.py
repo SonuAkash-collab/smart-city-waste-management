@@ -15,6 +15,7 @@ from app.services import route_engine
 from app.services.facilities import routing_facilities
 from app.services.notifications import notify
 from app.services.requests import announce_status, escalate_waiting_requests, utcnow
+from app.services.vehicles import VehicleOverloadError, add_load, unload
 
 ACTIVE_ROUTE = (RouteStatus.PLANNED, RouteStatus.IN_PROGRESS)
 
@@ -234,3 +235,63 @@ def get_route_for(db: Session, user: User, route_id: int) -> Route:
     if user.role != UserRole.ADMIN and route.vehicle_id not in _driver_vehicle_ids(db, user):
         raise ApiError(403, "FORBIDDEN", "This route belongs to another driver.")
     return route
+
+
+def update_stop(db: Session, driver: User, route_id: int, stop_id: int, outcome: str) -> dict:
+    """Driver marks a stop Collected or Missed (SCW-F-044).
+
+    * A collection stop updates its request to COLLECTED or MISSED, tells the
+      citizen, and a collected load is added to the vehicle (SCW-F-023).
+    * A facility stop marked Collected means the vehicle unloaded there.
+    * The route becomes In progress at the first update and Completed when no
+      stop is left; the vehicle is then Available again unless it is in
+      Maintenance (SCW-F-021).
+    """
+    route = get_route_for(db, driver, route_id)
+    stop = next((s for s in route.stops if s.id == stop_id), None)
+    if stop is None:
+        raise ApiError(404, "STOP_NOT_FOUND", "This stop is not on the route.")
+    if route.status == RouteStatus.COMPLETED:
+        raise ApiError(409, "ROUTE_COMPLETED", "This route is already completed.")
+    if stop.status != StopStatus.PENDING:
+        raise ApiError(409, "STOP_ALREADY_DONE", f"This stop is already {stop.status.value}.")
+
+    new_status = StopStatus(outcome)
+    vehicle = db.get(Vehicle, route.vehicle_id)
+    request = db.get(CollectionRequest, stop.request_id) if stop.request_id else None
+
+    if stop.stop_type == StopType.COLLECTION and new_status == StopStatus.COLLECTED:
+        try:
+            add_load(db, vehicle.id, request.estimated_quantity_kg)
+        except VehicleOverloadError as exc:
+            raise ApiError(409, "VEHICLE_FULL", str(exc)) from exc
+    if stop.stop_type == StopType.FACILITY and new_status == StopStatus.COLLECTED:
+        unload(db, vehicle.id)
+
+    stop.status = new_status
+    stop.completed_at = utcnow()
+    if request is not None:
+        request.status = (
+            RequestStatus.COLLECTED if new_status == StopStatus.COLLECTED else RequestStatus.MISSED
+        )
+        request.updated_at = utcnow()
+
+    route.status = RouteStatus.IN_PROGRESS
+    if all(s.status != StopStatus.PENDING for s in route.stops):
+        route.status = RouteStatus.COMPLETED
+        if vehicle.status != VehicleStatus.MAINTENANCE:
+            vehicle.status = VehicleStatus.AVAILABLE
+    db.commit()
+    db.refresh(vehicle)
+
+    if request is not None:
+        announce_status(db, request)
+    return {
+        "route_id": route.id,
+        "stop_id": stop.id,
+        "request_id": stop.request_id,
+        "status": stop.status,
+        "request_status": request.status.value if request else None,
+        "route_status": route.status,
+        "vehicle_load_kg": vehicle.current_load_kg,
+    }
