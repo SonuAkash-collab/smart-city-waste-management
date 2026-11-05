@@ -9,8 +9,8 @@
 | Priority | High |
 | Preconditions | 1. The system and vehicle management interface are available. 2. An authorized Admin account exists. 3. The vehicle management API is accessible. |
 | Test Data | Valid registration: KA01AB1234; duplicate registration: KA01AB1234; capacity: 1000 kg; invalid capacities: 0 kg and -100 kg; waste types: Wet and Dry; statuses: Available, On Route, Maintenance; depot: Test Depot. |
-| Actual Result | To be recorded during test execution. |
-| Status | Not run |
+| Actual Result | See the execution record below. |
+| Status | Pass |
 
 ## Test Steps
 
@@ -36,3 +36,12 @@
 ## Evidence
 
 Record actual results, screenshots and relevant test logs after execution. Keep the status as Not run until all applicable steps have been tested.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Waste types use the agreed codes (MIXED, RECYCLABLE, ...) instead of Wet/Dry; JSON uses camelCase (`registrationNumber`, `capacityKg`). Vehicle endpoints are Admin-only. Generating routes sets a vehicle On Route; finishing its route sets it back to Available unless it is in Maintenance. |
+| Automated tests | `test_vehicles.py`, `test_vehicle_load.py`, `test_routes_api.py::test_maintenance_and_driverless_vehicles_not_used`, `test_routes_api.py::test_vehicle_on_route_not_given_a_second_route`, `test_routes_driver.py::test_finishing_route_frees_vehicle_and_unloads` |
+| Actual result | Valid vehicle saved; duplicate registration 409; missing, zero and negative capacity 422; edits saved; Maintenance and On Route vehicles were not given routes; vehicle returned to Available after its route. |
+| Status | Pass |
