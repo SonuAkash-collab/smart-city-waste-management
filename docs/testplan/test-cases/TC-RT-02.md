@@ -22,7 +22,7 @@
 
 | \*\*Actual Result\*\* | To be recorded after execution. |
 
-| \*\*Status\*\* | Not run |
+| \*\*Status\*\* | Pass |
 
 
 
@@ -74,3 +74,11 @@
 
 \- Report any mismatch between expected and actual results as a defect.
 
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Each stop stores `loadAfterKg`; the route ends with an unloading stop at the nearest suitable facility. Vehicle load is tracked when the driver marks stops (SCW-F-023). |
+| Automated tests | `test_routes_api.py::test_capacity_respected_with_facility_detour`, `test_route_engine_facilities.py`, `test_vehicle_load.py` |
+| Actual result | Vehicle capacity 100 kg, three 60 kg requests: planned load never above 100 kg; the route detoured to the facility after the first pickup and again at the end. Unsuitable facilities (wrong type, too little room) were skipped. |
+| Status | Pass |
