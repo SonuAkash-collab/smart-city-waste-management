@@ -55,6 +55,10 @@ class RouteStop(Base):
     status: Mapped[StopStatus] = mapped_column(
         Enum(StopStatus, native_enum=False, length=20), default=StopStatus.PENDING
     )
+    latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+    load_after_kg: Mapped[float | None] = mapped_column(Float, nullable=True)
+    distance_km: Mapped[float | None] = mapped_column(Float, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     route: Mapped[Route] = relationship(back_populates="stops")
