@@ -61,7 +61,7 @@ export default function SubmitRequest() {
       <section class="card stack">
         <h2>Request #${created.id} received</h2>
         <p>
-          Status <${Badge} kind=${created.status}>${created.status}<//> · Priority
+          Status <${Badge} kind=${created.status}>${created.status}<//> · Priority${' '}
           <${Badge} kind=${created.priority}>${created.priority}<//>
         </p>
         <p class="muted">You will get a notification each time its status changes.</p>
