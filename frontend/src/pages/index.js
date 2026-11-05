@@ -3,6 +3,7 @@
 import Staff from './admin/Staff.js';
 import Login from './auth/Login.js';
 import Register from './auth/Register.js';
+import Vehicles from './fleet/Vehicles.js';
 import Home from './Home.js';
 import AdminRoutes from './routes/AdminRoutes.js';
 import DriverRoute from './routes/DriverRoute.js';
@@ -21,6 +22,7 @@ export const pages = [
   { path: '/admin/requests', component: AdminRequests, label: 'Requests', roles: ['ADMIN'] },
   { path: '/admin/routes', component: AdminRoutes, label: 'Routes', roles: ['ADMIN'] },
   { path: '/driver/route', component: DriverRoute, label: 'My route', roles: ['DRIVER'] },
+  { path: '/admin/vehicles', component: Vehicles, label: 'Vehicles', roles: ['ADMIN'] },
   { path: '/admin/staff', component: Staff, label: 'Staff', roles: ['ADMIN'] },
 ];
 
