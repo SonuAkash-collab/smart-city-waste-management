@@ -4,6 +4,7 @@ import Staff from './admin/Staff.js';
 import Login from './auth/Login.js';
 import Register from './auth/Register.js';
 import Facilities from './facilities/Facilities.js';
+import Intake from './facilities/Intake.js';
 import Vehicles from './fleet/Vehicles.js';
 import Home from './Home.js';
 import AdminRoutes from './routes/AdminRoutes.js';
@@ -26,6 +27,7 @@ export const pages = [
   { path: '/admin/vehicles', component: Vehicles, label: 'Vehicles', roles: ['ADMIN'] },
   { path: '/admin/facilities', component: Facilities, label: 'Facilities', roles: ['ADMIN'] },
   { path: '/admin/staff', component: Staff, label: 'Staff', roles: ['ADMIN'] },
+  { path: '/operator/intake', component: Intake, label: 'Record delivery', roles: ['OPERATOR'] },
 ];
 
 function match(pattern, path) {
