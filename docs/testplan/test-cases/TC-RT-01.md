@@ -22,7 +22,7 @@
 
 | \*\*Actual Result\*\* | To be recorded after execution. |
 
-| \*\*Status\*\* | Not run |
+| \*\*Status\*\* | Pass |
 
 
 
@@ -71,3 +71,12 @@
 \- Record \*\*Not run\*\* until the test has actually been executed.
 
 \- Report any mismatch between the expected and actual results as a defect.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Routes are generated with `POST /api/v1/routes/generate {"date": ...}` from every Approved request; only Available vehicles with an assigned driver are used. Equal-priority stops are chosen nearest-next from the vehicle's current position. |
+| Automated tests | `test_routes_api.py::test_generate_orders_by_priority_then_distance`, `test_route_engine.py` (ordering tests) |
+| Actual result | Four approved requests and one Submitted request: the Submitted one was left out; the High request came first, then the two Medium requests nearest-next, then Low. Route saved with date and driver. |
+| Status | Pass |
