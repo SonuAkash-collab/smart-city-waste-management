@@ -119,3 +119,9 @@ td { padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--line); vertical-alig
   table.responsive td::before { content: attr(data-label); font-weight: 600; color: var(--muted); font-size: 0.8rem; }
   .map { height: 260px; }
 }
+
+/* numbered route pins */
+.stop-pin span {
+  display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
+  color: #fff; font-weight: 700; font-size: 0.8rem; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
