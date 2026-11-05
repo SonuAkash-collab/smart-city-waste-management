@@ -9,10 +9,11 @@ from app.core.errors import ApiError
 from app.models.collection_request import CollectionRequest, RequestStatus
 from app.models.facility import Facility
 from app.models.route import Route, RouteStatus, RouteStop, StopStatus, StopType
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.models.vehicle import Vehicle, VehicleStatus
 from app.services import route_engine
 from app.services.facilities import routing_facilities
+from app.services.notifications import notify
 from app.services.requests import announce_status, escalate_waiting_requests, utcnow
 
 ACTIVE_ROUTE = (RouteStatus.PLANNED, RouteStatus.IN_PROGRESS)
@@ -99,6 +100,15 @@ def _engine_inputs(db: Session, day: date):
     return request_inputs, vehicle_inputs, routing_facilities(db, day)
 
 
+def alert_admins(db: Session, message: str) -> None:
+    """Send an in-app alert to every active Admin (TC-RT-04 step 5)."""
+    admins = db.scalars(
+        select(User).where(User.role == UserRole.ADMIN, User.is_active.is_(True))
+    ).all()
+    for admin in admins:
+        notify(db, admin.id, message)
+
+
 def generate_routes(db: Session, day: date) -> dict:
     """Plan and save routes for ``day`` from every Approved request (SCW-F-040)."""
     existing = db.scalar(
@@ -151,6 +161,15 @@ def generate_routes(db: Session, day: date) -> dict:
 
     for request in scheduled:
         announce_status(db, request)
+    for alert in plan.alerts:
+        alert_admins(db, f"Route alert for {day}: {alert.message}")
+    if plan.unassigned:
+        ids = ", ".join(f"#{u.request_id}" for u in plan.unassigned)
+        alert_admins(
+            db,
+            f"Routes for {day}: {len(plan.unassigned)} approved request(s) could not be planned "
+            f"({ids}). They stay Approved for the next run.",
+        )
 
     count = len(saved)
     return {
