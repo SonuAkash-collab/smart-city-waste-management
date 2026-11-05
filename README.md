@@ -19,14 +19,15 @@ Manage waste collection requests, vehicles and disposal facilities. Generate eff
 | Rottela Haritej | PES1UG24AM231 |
 | Purushothama KC | PES1UG25AM810 |
 
-## Key Features (Planned)
+## Features
 
-- Citizen waste collection requests with priority levels
-- Vehicle and capacity management
-- Disposal facility management
-- Optimized route generation based on location, capacity, priority and distance
-- Admin dashboard
-- Request status tracking
+- Citizens request pickups on a map and follow each request until it is collected
+- Priority from waste type, raised after 48 hours, with Admin override
+- Route generation: priority first, then nearest stop, within vehicle capacity, with detours to suitable facilities
+- Drivers see their route on a map and mark stops Collected or Missed
+- Operators record deliveries; facility capacity updates at once
+- In-app and email notifications, Admin dashboard and daily CSV report
+- JWT login, roles checked on the server, account lockout, audit log
 
 ## Users and Roles
 
@@ -58,54 +59,37 @@ Manage waste collection requests, vehicles and disposal facilities. Generate eff
 
 ```
 .
-├── docs/            Project documentation (SRS, SAD, Test Plan)
-│   └── diagrams/    UML and architecture diagrams
-├── src/             Application source code
-├── tests/           Automated tests
-├── .gitignore       Files and folders excluded from version control
-└── README.md        Project overview
+├── backend/            FastAPI app (app/), tests (tests/), scripts (scripts/)
+├── frontend/           Web app (React + Leaflet browser builds, no build step)
+├── docs/               SRS, SAD, Test Plan, test cases, sprint notes, reports, user guide
+└── .github/workflows/  CI: tests with coverage on every pull request
 ```
 
 ## How to run
 
-The backend lives in `backend/`. Python 3.11 or newer is required.
+Python 3.11 or newer. From the repository folder:
 
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+.venv\Scripts\activate            # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env             # Windows: copy .env.example .env
-```
-
-Start the API (tables are created on startup in the database named by `DATABASE_URL`, default `sqlite:///./app.db`):
-
-```bash
+python scripts/seed_demo.py --reset  # demo data (optional)
 uvicorn app.main:app --reload
 ```
 
-- Health check: http://127.0.0.1:8000/health
-- Swagger docs: http://127.0.0.1:8000/docs
+Open http://localhost:8000 for the web app and http://localhost:8000/docs for the API.
+Demo accounts: `admin@scw.local` / `Admin@1234`; `citizen1@scw.local`, `driver1@scw.local`, `operator1@scw.local` / `Demo@1234`.
+Without demo data, create the first Admin with `python scripts/create_admin.py --email you@example.com --password <password>`.
+After pulling model changes, run `python scripts/seed_demo.py --reset` again (it rebuilds the tables).
 
-Run the tests (they use an in-memory SQLite database):
+## Tests and reports
 
 ```bash
-pytest
-pytest --cov=app    # with coverage
+cd backend
+python -m pytest --cov=app --cov-branch          # all tests with coverage
+python scripts/generate_reports.py               # writes docs/reports/*.md
+pip install -r requirements-perf.txt && python scripts/run_perf.py   # load test (TC-PERF-01/02)
 ```
 
-## Project Deliverables
-
-| Document                     | Status      |
-|------------------------------|-------------|
-| SRS                          | In progress |
-| SAD (Architecture & Design)  | Not started |
-| Test Plan                    | Not started |
-| Implementation               | Not started |
-
-## Contributing
-
-1. Create a feature branch from the default branch: `feature/<name>`.
-2. Commit your work with clear, descriptive commit messages.
-3. Open a pull request to the default branch (`main`).
-4. At least one teammate must review and approve the pull request before it is merged.
+Reports: `docs/reports/`. Sprint notes and deviations: `docs/sprints/`. User guide: `docs/user-guide.md`.
