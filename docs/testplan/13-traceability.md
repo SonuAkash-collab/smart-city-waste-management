@@ -104,3 +104,36 @@ Every requirement ID has at least one dedicated test case. Security objectives (
 | **Total** | **36** | **34** | **2** | **100%** |
 
 The plan contains 26 test cases. All 26 trace to at least one requirement ID, and all 36 requirement IDs are covered by at least one test case (100% requirements coverage).
+
+### 13.4 Execution status (Part 3, November 2026)
+
+| Test case | Automated tests | Status |
+|---|---|---|
+| TC-ADM-01 | `test_users.py` | Pass |
+| TC-AUTH-01 | `test_auth.py` (login tests) | Pass |
+| TC-AUTH-02 | `test_routes_api.py::test_only_admin_generates`, `test_requests_admin.py::test_citizen_cannot_approve`, `test_auth.py` (role guard tests); browser walkthrough | Pass |
+| TC-AVL-01 | `test_health.py` (health endpoint) | Not run yet |
+| TC-FAC-01 | `test_facilities.py` (intake and exclusion tests), `test_route_engine_facilities.py` | Pass |
+| TC-FAC-02 | `test_facilities.py` (registration tests) | Pass |
+| TC-MNT-01 | `pytest --cov=app --cov-branch` (all 231 tests) | Pass |
+| TC-NOT-01 | `test_notifications.py`, `test_requests_admin.py::test_every_status_change_notifies_owner` | Pass |
+| TC-PERF-01 | `test_route_engine_performance.py` (engine only, every CI run); `scripts/run_perf.py` (full API) | Pass |
+| TC-PERF-02 | `tests/perf/locustfile.py` run by `scripts/run_perf.py` | Pass |
+| TC-REQ-01 | `test_requests_submit.py` (submission tests) | Pass |
+| TC-REQ-02 | `test_requests_submit.py` (priority and escalation tests), `test_requests_admin.py::test_admin_priority_override` | Pass |
+| TC-REQ-03 | `test_requests_admin.py` (cancel tests), `test_requests_tracking.py` | Pass |
+| TC-REQ-04 | `test_requests_admin.py` (filter, paging and decision tests) | Pass |
+| TC-RPT-01 | `test_dashboard_reports.py` | Pass |
+| TC-RT-01 | `test_routes_api.py::test_generate_orders_by_priority_then_distance`, `test_route_engine.py` (ordering tests) | Pass |
+| TC-RT-02 | `test_routes_api.py::test_capacity_respected_with_facility_detour`, `test_route_engine_facilities.py`, `test_vehicle_load.py` | Pass |
+| TC-RT-03 | `test_routes_driver.py` (13 tests) | Pass |
+| TC-RT-04 | `test_routes_api.py::test_no_facility_stops_route_and_alerts_admin`, `test_route_engine_facilities.py::test_no_suitable_facility_stops_route_and_alerts_admin` | Pass |
+| TC-SEC-01 | `test_security_lockout.py` (6 tests), `test_auth.py::test_register_creates_citizen` | Pass |
+| TC-SEC-02 | `test_auth.py` (token and role tests), `test_transport.py` | Pass |
+| TC-SEC-03 | `test_transport.py`; manual TLS check (see `docs/reports/security-validation.md`) | Pass |
+| TC-SEC-04 | `test_audit.py` (4 tests) | Pass |
+| TC-USE-01 | `test_web.py` (web app served); browser walkthrough at 360 px | Not run yet |
+| TC-VEH-01 | `test_vehicles.py`, `test_vehicle_load.py`, `test_routes_api.py::test_maintenance_and_driverless_vehicles_not_used`, `test_routes_api.py::test_vehicle_on_route_not_given_a_second_route`, `test_routes_driver.py::test_finishing_route_frees_vehicle_and_unloads` | Pass |
+| TC-VEH-02 | `test_driver_assignment.py` (7 tests), `test_vehicle_load.py::test_vehicle_endpoints_are_admin_only` | Pass |
+
+Details: `docs/reports/system-validation-report.md` and the execution record at the end of each test case file.
