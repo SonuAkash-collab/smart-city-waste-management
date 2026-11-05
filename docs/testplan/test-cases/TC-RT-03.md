@@ -22,7 +22,7 @@
 
 | \*\*Actual Result\*\* | To be recorded after execution. |
 
-| \*\*Status\*\* | Not run |
+| \*\*Status\*\* | Pass |
 
 
 
@@ -78,3 +78,11 @@
 
 \- Report any mismatch between expected and actual results as a defect.
 
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Drivers open `GET /api/v1/routes/assigned` (web page 'My route') and update stops with `PATCH /api/v1/routes/{id}/stops/{stopId}`. Facility stops are marked 'Unloaded'. |
+| Automated tests | `test_routes_driver.py` (13 tests) |
+| Actual result | Stops listed in saved order with coordinates; marking Collected and Missed set the requests to COLLECTED and MISSED, the third request stayed SCHEDULED; other drivers got 403. Browser check: numbered pins shown on the map. |
+| Status | Pass |
