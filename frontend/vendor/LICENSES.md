@@ -8,6 +8,7 @@ These files are copied unchanged from their npm packages so the web app runs wit
 | react-dom.production.min.js | react-dom | 18.3.1 | MIT |
 | htm.umd.js | htm | 3.1.1 | Apache-2.0 |
 | leaflet/ | leaflet | 1.9.4 | BSD-2-Clause |
+| fonts/archivo-latin-wdth-normal.woff2 | @fontsource-variable/archivo | 5.3.0 | SIL OFL 1.1 |
 
 Map tiles are loaded at run time from OpenStreetMap (© OpenStreetMap contributors, ODbL).
 
@@ -88,3 +89,8 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
+
+## Archivo font (fonts/)
+
+Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo).
+Licensed under the SIL Open Font License, Version 1.1 (https://openfontlicense.org).
