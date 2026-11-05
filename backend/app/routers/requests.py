@@ -55,8 +55,11 @@ def get_request(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """The full request for its owner or an Admin."""
-    return request_service.get_request_for(db, user, request_id)
+    """The full request for its owner or an Admin, with its route date once scheduled."""
+    request = request_service.get_request_for(db, user, request_id)
+    detail = RequestDetail.model_validate(request).model_dump()
+    detail.update(request_service.schedule_of(db, request))
+    return detail
 
 
 @router.patch(

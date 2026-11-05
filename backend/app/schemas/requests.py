@@ -1,5 +1,6 @@
 """Pydantic schemas for requests (SAD 4.3, Request Service)."""
 
+from datetime import date
 from typing import Literal
 
 from pydantic import Field, field_validator
@@ -62,6 +63,8 @@ class RequestOut(CamelModel):
 
 class RequestDetail(RequestOut):
     photo: str | None = None
+    scheduled_date: date | None = None
+    route_id: int | None = None
 
 
 class RequestPage(CamelModel):

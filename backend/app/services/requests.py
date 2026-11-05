@@ -229,3 +229,21 @@ def cancel(db: Session, citizen: User, request_id: int) -> CollectionRequest:
     db.refresh(request)
     announce_status(db, request)
     return request
+
+
+def schedule_of(db: Session, request: CollectionRequest) -> dict:
+    """The route date a request is planned for, if any (SCW-F-012).
+
+    The date lives on the route (RouteStop -> Route.route_date), so the
+    request table does not need its own copy.
+    """
+    from app.models.route import Route, RouteStop  # local import avoids a cycle
+
+    row = db.execute(
+        select(Route.id, Route.route_date)
+        .join(RouteStop, RouteStop.route_id == Route.id)
+        .where(RouteStop.request_id == request.id)
+        .order_by(Route.route_date.desc())
+        .limit(1)
+    ).first()
+    return {"route_id": row[0], "scheduled_date": row[1]} if row else {"route_id": None, "scheduled_date": None}
