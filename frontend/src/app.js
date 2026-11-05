@@ -1,3 +1,5 @@
+import { get } from './api.js';
+import Icon from './components/Icon.js';
 import { html, ReactDOM, useEffect, useState } from './lib.js';
 import Login from './pages/auth/Login.js';
 import { findPage, pages } from './pages/index.js';
@@ -40,33 +42,91 @@ function menuItems(user) {
   return pages.filter((page) => page.menu !== false && canOpen(page, user));
 }
 
-function Header({ user, path }) {
+function initials(name) {
+  return (name || '?')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join('');
+}
+
+function Brand() {
+  return html`<a class="rail-brand" href="#/">
+    <span class="mark"><${Icon} name="bin" /></span>
+    <span class="wordmark">Smart City Waste<small>Collection & routing</small></span>
+  </a>`;
+}
+
+// Unread notifications for the menu badge, refreshed on every page change.
+function useUnread(user, path) {
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    if (!user) return;
+    get('/notifications')
+      .then((data) => setUnread(data.unread || 0))
+      .catch(() => setUnread(0));
+  }, [user, path]);
+  return unread;
+}
+
+// Menu items grouped by their `group` field, in the order of pages/index.js.
+function groupItems(items) {
+  const groups = [];
+  items.forEach((item) => {
+    const name = item.group || 'Menu';
+    let group = groups.find((g) => g.name === name);
+    if (!group) {
+      group = { name, items: [] };
+      groups.push(group);
+    }
+    group.items.push(item);
+  });
+  return groups;
+}
+
+function Sidebar({ user, path }) {
+  const unread = useUnread(user, path);
   const logout = () => {
     clearSession();
     navigate('/login');
   };
   return html`
-    <header class="topbar">
-      <a class="brand" href="#/">
-        <span class="logo" aria-hidden="true"></span>
-        <span>Smart City Waste</span>
-      </a>
-      ${user &&
-      html`<div class="who">
-        <span class="who-name">${user.fullName}</span>
-        <span class="who-role">${user.role}</span>
-        <button class="ghost small" onClick=${logout}>Log out</button>
-      </div>`}
-    </header>
-    <nav class="menu" aria-label="Main menu">
-      ${menuItems(user).map(
-        (item) =>
-          html`<a key=${item.path} href=${'#' + item.path} class=${path === item.path ? 'active' : ''}
-            >${item.label}</a
-          >`,
-      )}
-    </nav>
+    <aside class="rail">
+      <${Brand} />
+      <nav aria-label="Main menu">
+        ${groupItems(menuItems(user)).map(
+          (group) => html`<div key=${group.name}>
+            <div class="nav-group">${group.name}</div>
+            ${group.items.map(
+              (item) => html`<a key=${item.path} href=${'#' + item.path}
+                class=${'nav-link' + (path === item.path ? ' active' : '')}
+                aria-current=${path === item.path ? 'page' : undefined}>
+                <${Icon} name=${item.icon} />
+                <span>${item.label}</span>
+                ${item.path === '/notifications' && unread > 0 && html`<span class="nav-count">${unread}</span>`}
+              </a>`,
+            )}
+          </div>`,
+        )}
+      </nav>
+      <div class="rail-user">
+        <span class="avatar" aria-hidden="true">${initials(user.fullName)}</span>
+        <span class="who"><strong>${user.fullName}</strong><span class="role">${user.role.toLowerCase()}</span></span>
+        <button class="icon-btn" title="Log out" aria-label="Log out" onClick=${logout}><${Icon} name="logout" /></button>
+      </div>
+    </aside>
   `;
+}
+
+function GuestTop() {
+  return html`<header class="guest-top">
+    <${Brand} />
+    <nav aria-label="Account">
+      <a href="#/login">Log in</a>
+      <a class="cta" href="#/register">Create account</a>
+    </nav>
+  </header>`;
 }
 
 function Forbidden() {
@@ -85,13 +145,23 @@ function App() {
   if (found && found.page.roles && !user) Page = Login;
   else if (found && found.page.guestOnly && user) Page = pages[0].component;
   else if (found && !canOpen(found.page, user)) Page = Forbidden;
-  return html`
-    <${Header} user=${user} path=${path} />
-    <main class="content">
-      <${Page} key=${path} params=${found ? found.params : {}} user=${user} />
-    </main>
-    <footer class="footer">Team 04 · Smart City Waste Management System</footer>
-  `;
+  const page = html`<${Page} key=${path} params=${found ? found.params : {}} user=${user} />`;
+  const footer = html`<footer class="footer">Team 04 · Smart City Waste Management System</footer>`;
+
+  if (!user) {
+    return html`<div class="guest">
+      <${GuestTop} />
+      <main class="content">${page}</main>
+      ${footer}
+    </div>`;
+  }
+  return html`<div class="shell">
+    <${Sidebar} user=${user} path=${path} />
+    <div class="main-area">
+      <main class="content">${page}</main>
+      ${footer}
+    </div>
+  </div>`;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(html`<${App} />`);
