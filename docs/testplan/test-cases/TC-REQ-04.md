@@ -12,7 +12,16 @@
 | Steps | 1. As Admin, call `GET /api/v1/requests?status=APPROVED&page=1&size=20`; record the response. 2. Call the same endpoint with `priority=HIGH`, then with `wasteType=MIXED`, then with `date=2026-10-10`, retaining `page=1&size=20` in each request; record each response. 3. Call the documented combined-filter example `GET /api/v1/requests?status=APPROVED&priority=HIGH&wasteType=MIXED&date=2026-10-10&page=1&size=20`; record the response. 4. As Admin, call `PATCH /api/v1/requests/{id}/status` for the first eligible request with `{"status":"APPROVED"}`; record the response and retrieve that request using `GET /api/v1/requests/{id}`. 5. Repeat the PATCH and GET for the second eligible request with `{"status":"REJECTED"}`. 6. As the Citizen, attempt `PATCH /api/v1/requests/{id}/status` with `{"status":"APPROVED"}` on the separate eligible request; record the HTTP status and error body. |
 | Expected result | Steps 1–3: Each GET returns HTTP 200 with a response containing `items`, `page`, `size`, and `total`; `page` is 1 and `size` is 20. Each result includes only records matching its specified filter or combined filter criteria. Steps 4–5: Each Admin PATCH returns HTTP 200 with the documented update response fields `id`, `status`, `priority`, and `updatedAt`; the returned status is `APPROVED` for step 4 and `REJECTED` for step 5. The subsequent GET returns HTTP 200 with the full request object and the corresponding status. Step 6: The Citizen's PATCH returns HTTP 403 with the common API error body and code `FORBIDDEN`. |
 | Pass/fail criteria | Pass if each filter request returns HTTP 200 and only matching results, Admin approval and rejection each return HTTP 200 and are reflected by subsequent GET responses, and the Citizen's Admin-only PATCH returns HTTP 403 with code `FORBIDDEN`. Fail if any observed result differs. Mark affected checks Blocked if the required authenticated contexts or suitable request records are unavailable; do not assume credentials or a particular fixture-creation method. |
-| Actual result | |
-| Status | Not run |
+| Actual result | See the execution record below. |
+| Status | Pass |
 
 The filtering query parameters and list response shape, status-update endpoint, Admin role, and HTTP 200 response are specified in the Request Service API contract. The API contract also specifies HTTP 403 for a non-Admin PATCH; the `FORBIDDEN` error code is specified by the SRS role-access requirement.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Filtering by `date` uses the submission date. Invalid transitions return 409 INVALID_STATUS_TRANSITION. |
+| Automated tests | `test_requests_admin.py` (filter, paging and decision tests) |
+| Actual result | Each filter and the combined filter returned only matching requests with `items`, `page`, `size`, `total`; approve and reject returned 200 and GET showed the new status; Citizen PATCH returned 403 FORBIDDEN. |
+| Status | Pass |
