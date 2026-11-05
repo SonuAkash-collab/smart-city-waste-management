@@ -6,6 +6,7 @@ import Register from './auth/Register.js';
 import Facilities from './facilities/Facilities.js';
 import Intake from './facilities/Intake.js';
 import Vehicles from './fleet/Vehicles.js';
+import Dashboard from './dashboard/Dashboard.js';
 import Home from './Home.js';
 import Notifications from './Notifications.js';
 import AdminRoutes from './routes/AdminRoutes.js';
@@ -22,6 +23,7 @@ export const pages = [
   { path: '/requests/mine', component: MyRequests, label: 'My requests', roles: ['CITIZEN'] },
   { path: '/requests/new', component: SubmitRequest, label: 'Request pickup', roles: ['CITIZEN'] },
   { path: '/requests/:id', component: RequestDetail, label: 'Request', roles: ['CITIZEN', 'ADMIN'], menu: false },
+  { path: '/admin/dashboard', component: Dashboard, label: 'Dashboard', roles: ['ADMIN'] },
   { path: '/admin/requests', component: AdminRequests, label: 'Requests', roles: ['ADMIN'] },
   { path: '/admin/routes', component: AdminRoutes, label: 'Routes', roles: ['ADMIN'] },
   { path: '/driver/route', component: DriverRoute, label: 'My route', roles: ['DRIVER'] },
