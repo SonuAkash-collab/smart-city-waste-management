@@ -7,12 +7,14 @@ import Home from './Home.js';
 import AdminRoutes from './routes/AdminRoutes.js';
 import DriverRoute from './routes/DriverRoute.js';
 import AdminRequests from './requests/AdminRequests.js';
+import MyRequests from './requests/MyRequests.js';
 import SubmitRequest from './requests/SubmitRequest.js';
 
 export const pages = [
   { path: '/', component: Home, label: 'Home', roles: null, menu: false },
   { path: '/login', component: Login, label: 'Log in', roles: null, guestOnly: true },
   { path: '/register', component: Register, label: 'Register', roles: null, guestOnly: true },
+  { path: '/requests/mine', component: MyRequests, label: 'My requests', roles: ['CITIZEN'] },
   { path: '/requests/new', component: SubmitRequest, label: 'Request pickup', roles: ['CITIZEN'] },
   { path: '/admin/requests', component: AdminRequests, label: 'Requests', roles: ['ADMIN'] },
   { path: '/admin/routes', component: AdminRoutes, label: 'Routes', roles: ['ADMIN'] },
