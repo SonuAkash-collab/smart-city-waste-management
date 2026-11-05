@@ -8,7 +8,7 @@
 | Requirement ID | SCW-F-042 |
 | Test Type | Functional / Route Generation Edge Case |
 | Priority | High |
-| Status | Not run |
+| Status | Pass |
 
 ## Objective
 
@@ -66,5 +66,14 @@ Record the exact vehicle load, capacity, request quantity, and facility capaciti
 
 ## Outcome
 
-- Status: Not run
+- Status: Pass
 - Defects or observations: To be recorded after execution.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | When no facility can take the load, the route stops, the request stays APPROVED with reason NO_CAPACITY, and every Admin gets an in-app and email alert. |
+| Automated tests | `test_routes_api.py::test_no_facility_stops_route_and_alerts_admin`, `test_route_engine_facilities.py::test_no_suitable_facility_stops_route_and_alerts_admin` |
+| Actual result | Capacity 100 kg, two 90 kg requests, facility with 10 kg left: route kept one pickup (load 90 kg), alert listed vehicle and load, Admin notification created, second request left Approved. |
+| Status | Pass |
