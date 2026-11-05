@@ -1,4 +1,5 @@
 import { del, get } from '../../api.js';
+import Icon from '../../components/Icon.js';
 import { Badge, formatDateTime, html, Notice, useEffect, useState, wasteLabel } from '../../lib.js';
 
 const CANCELLABLE = ['SUBMITTED', 'APPROVED'];
@@ -33,15 +34,24 @@ export default function MyRequests() {
   const pages = data ? Math.max(1, Math.ceil(data.total / 10)) : 1;
   return html`
     <div class="page-head">
-      <div><h1>My requests</h1><p class="muted">Follow each pickup from approval to collection.</p></div>
-      <a class="button" href="#/requests/new">New request</a>
+      <div>
+        <span class="eyebrow">Pickups</span>
+        <h1>My requests</h1>
+        <p class="muted">Follow each pickup from approval to collection.${data ? ` ${data.total} in total.` : ''}</p>
+      </div>
+      <a class="button" href="#/requests/new"><${Icon} name="plus" /> New request</a>
     </div>
     <${Notice} kind=${message.kind}>${message.text}<//>
     <section class="card">
       ${!data
         ? html`<p class="muted">Loading…</p>`
         : data.items.length === 0
-          ? html`<p class="muted">You have not requested any pickups yet.</p>`
+          ? html`<div class="empty">
+              <span class="how-icon"><${Icon} name="inbox" /></span>
+              <h3>No pickups yet</h3>
+              <p class="muted">Request your first pickup. It takes under a minute.</p>
+              <a class="button" href="#/requests/new">Request a pickup</a>
+            </div>`
           : html`<table class="responsive">
               <thead><tr><th>Request</th><th>Waste</th><th>Priority</th><th>Status</th><th></th></tr></thead>
               <tbody>

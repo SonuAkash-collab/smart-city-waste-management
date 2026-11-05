@@ -1,4 +1,5 @@
 import { get } from '../../api.js';
+import Icon from '../../components/Icon.js';
 import { baseMap } from '../../components/MapPicker.js';
 import { Badge, formatDateTime, html, L, Notice, useEffect, useRef, useState, wasteLabel } from '../../lib.js';
 
@@ -23,23 +24,34 @@ export default function RequestDetail({ params }) {
   if (error) return html`<${Notice} kind="error">${error}<//>`;
   if (!item) return html`<p class="muted">Loading…</p>`;
   const reached = STEPS.indexOf(item.status);
+  const stopped = ['REJECTED', 'MISSED', 'CANCELLED'].includes(item.status);
   return html`
     <div class="page-head">
-      <div><h1>Request #${item.id}</h1><p class="muted">${wasteLabel(item.wasteType)} · ${item.estimatedQuantityKg} kg · sent ${formatDateTime(item.createdAt)}</p></div>
+      <div>
+        <span class="eyebrow">Pickup request</span>
+        <h1>Request #${item.id}</h1>
+        <p class="muted">${wasteLabel(item.wasteType)} · ${item.estimatedQuantityKg} kg · sent ${formatDateTime(item.createdAt)}</p>
+      </div>
       <${Badge} kind=${item.status}>${item.status}<//>
     </div>
-    <section class="card">
-      <ol class="timeline">
-        ${STEPS.map((s, i) => html`<li key=${s} class=${i <= reached ? 'done' : ''}>${s.toLowerCase()}</li>`)}
-      </ol>
-      ${['REJECTED', 'MISSED', 'CANCELLED'].includes(item.status) &&
-      html`<${Notice} kind="warn">This request was ${item.status.toLowerCase()}${item.reason ? `: ${item.reason}` : '.'}<//>`}
-      ${item.scheduledDate && html`<p>Planned for collection on <strong>${item.scheduledDate}</strong>.</p>`}
-      <p>Priority <${Badge} kind=${item.priority}>${item.priority}<//>${item.priorityOverridden ? ' (set by the city)' : ''}</p>
-      <p class="muted">${item.address || ''}</p>
-    </section>
-    <section class="card"><div ref=${holder} class="map"></div></section>
-    ${item.photo && html`<section class="card"><img alt="Photo of the waste" style=${{ maxWidth: '100%', borderRadius: '8px' }} src=${`data:image/*;base64,${item.photo}`} /></section>`}
-    <p><a href="#/requests/mine">← Back to my requests</a></p>
+    <div class="split">
+      <section class="card">
+        <h2>Progress</h2>
+        <ol class="timeline">
+          ${STEPS.map((s, i) => html`<li key=${s} class=${i < reached || (i === reached && s === 'COLLECTED') ? 'done' : i === reached ? 'done current' : ''}>${s.toLowerCase()}</li>`)}
+        </ol>
+        ${stopped && html`<${Notice} kind="warn">This request was ${item.status.toLowerCase()}${item.reason ? `: ${item.reason}` : '.'}<//>`}
+        <dl class="detail-list">
+          <dt>Waste</dt><dd>${wasteLabel(item.wasteType)}</dd>
+          <dt>Quantity</dt><dd>${item.estimatedQuantityKg} kg</dd>
+          <dt>Priority</dt><dd><${Badge} kind=${item.priority}>${item.priority}<//>${item.priorityOverridden ? html` <span class="hint">set by the city</span>` : ''}</dd>
+          <dt>Collection</dt><dd>${item.scheduledDate ? html`Planned for <strong>${item.scheduledDate}</strong>` : html`<span class="hint">Not planned yet</span>`}</dd>
+          ${item.address && html`<dt>Address</dt><dd>${item.address}</dd>`}
+        </dl>
+        ${item.photo && html`<img alt="Photo of the waste" style=${{ maxWidth: '100%', borderRadius: '8px', marginTop: '1rem' }} src=${`data:image/*;base64,${item.photo}`} />`}
+      </section>
+      <section class="card"><div ref=${holder} class="map tall"></div></section>
+    </div>
+    <p><a class="back" href="#/requests/mine"><${Icon} name="arrow" /> Back to my requests</a></p>
   `;
 }
