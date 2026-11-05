@@ -8,6 +8,7 @@ from app.core.errors import ApiError
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User, UserRole
 from app.schemas.auth import RegisterRequest
+from app.services.security import ensure_not_locked, record_failed_login, record_successful_login
 
 
 def get_user_by_email(db: Session, email: str) -> User | None:
@@ -38,10 +39,16 @@ def authenticate(db: Session, email: str, password: str) -> User:
     response does not reveal which emails are registered.
     """
     user = get_user_by_email(db, email)
-    if user is None or not verify_password(password, user.hashed_password):
+    if user is None:
+        raise ApiError(401, "INVALID_CREDENTIALS", "Email or password is incorrect.")
+    ensure_not_locked(user)  # SCW-SEC-005
+    if not verify_password(password, user.hashed_password):
+        if record_failed_login(db, user):
+            raise ApiError(403, "ACCOUNT_LOCKED", "Too many failed logins. Try again in 15 minutes.")
         raise ApiError(401, "INVALID_CREDENTIALS", "Email or password is incorrect.")
     if not user.is_active:
         raise ApiError(401, "ACCOUNT_DEACTIVATED", "This account has been deactivated.")
+    record_successful_login(db, user)
     return user
 
 
