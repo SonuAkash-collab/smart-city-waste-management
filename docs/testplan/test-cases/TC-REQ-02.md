@@ -12,7 +12,16 @@
 | Steps | 1. Using the authenticated Citizen request context, submit one request for each API-supported waste type using `POST /api/v1/requests`; record each response's `id` and `priority`. 2. For Submitted aging checks, use submitted requests whose actual elapsed age exceeds 48 hours, including requests starting at Low, Medium, and High. For Approved aging checks, use separate requests and the documented Admin `PATCH /api/v1/requests/{id}/status` request to set `status` to `APPROVED` and the starting `priority` to Low, Medium, or High; check each only after its actual elapsed age exceeds 48 hours. Retrieve each request using `GET /api/v1/requests/{id}` as its owner or Admin and record its status and priority. If the required elapsed time has not passed, mark those aging checks Blocked. 3. For separate requests, use the authenticated Admin context to call `PATCH /api/v1/requests/{id}/status` with `{"status":"APPROVED","priority":"HIGH"}`, then repeat with `MEDIUM` and `LOW` on separate requests. Record each PATCH response. 4. Retrieve each overridden request using `GET /api/v1/requests/{id}` and record its priority. |
 | Expected result | Step 1: Each POST returns HTTP 201 with `id`, `status`, `priority`, and `createdAt`; the returned initial priority matches the expected group for that API-supported waste type. Step 2: For requests still Submitted or Approved after more than 48 hours, priority rises one level: Low to Medium, Medium to High, and High remains High. Step 3: Each Admin PATCH returns HTTP 200 with `id`, `status`, `priority`, and `updatedAt`; the returned priority equals the requested override. Step 4: GET by ID returns HTTP 200 with the full request object, and its priority equals the saved override. |
 | Pass/fail criteria | Pass if all seven API-supported waste-type priority assignments, age-based one-level increases and the High cap, and all three Admin override values are observed through the documented responses. The result does not establish API coverage for “general”; that source inconsistency remains explicitly out of this API test. Fail if any tested result differs. Mark aging checks Blocked if requests have not actually remained in the required status for more than 48 hours; do not assume credentials, altered timestamps, or database access. |
-| Actual result | |
-| Status | Not run |
+| Actual result | See the execution record below. |
+| Status | Pass |
 
 The API contract documents `PATCH /api/v1/requests/{id}/status` with status `APPROVED|REJECTED` and optional priority override; Admin override and Approved-aging checks therefore use the documented `APPROVED` status and separate requests. The API and SRS do not define a test clock or timestamp-control mechanism; aging checks rely on actual elapsed time and are Blocked until the required age is reached.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | The 48-hour rule raises a waiting request once; HIGH stays HIGH; an Admin override is never changed by the rule. Aging was tested by setting the creation time back 49 hours in the test database instead of waiting. |
+| Automated tests | `test_requests_submit.py` (priority and escalation tests), `test_requests_admin.py::test_admin_priority_override` |
+| Actual result | All 7 waste types got the agreed priority; Low became Medium and Medium became High after 48 h, High stayed High, both for Submitted and Approved requests; overrides to HIGH, MEDIUM and LOW were saved and returned by GET. |
+| Status | Pass |
