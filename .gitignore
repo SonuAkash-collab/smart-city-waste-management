@@ -55,3 +55,4 @@ desktop.ini
 
 # Local email outbox
 email-outbox.log
+perf_*.csv
