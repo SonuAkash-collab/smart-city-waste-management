@@ -7,6 +7,7 @@ import Facilities from './facilities/Facilities.js';
 import Intake from './facilities/Intake.js';
 import Vehicles from './fleet/Vehicles.js';
 import Home from './Home.js';
+import Notifications from './Notifications.js';
 import AdminRoutes from './routes/AdminRoutes.js';
 import DriverRoute from './routes/DriverRoute.js';
 import AdminRequests from './requests/AdminRequests.js';
@@ -28,6 +29,7 @@ export const pages = [
   { path: '/admin/facilities', component: Facilities, label: 'Facilities', roles: ['ADMIN'] },
   { path: '/admin/staff', component: Staff, label: 'Staff', roles: ['ADMIN'] },
   { path: '/operator/intake', component: Intake, label: 'Record delivery', roles: ['OPERATOR'] },
+  { path: '/notifications', component: Notifications, label: 'Notifications', roles: ['CITIZEN', 'DRIVER', 'ADMIN', 'OPERATOR'] },
 ];
 
 function match(pattern, path) {
