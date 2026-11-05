@@ -61,7 +61,9 @@ def test_load_shows_in_vehicle_details(client, admin_headers, db_session, truck)
 @pytest.mark.parametrize("role", [UserRole.CITIZEN, UserRole.DRIVER, UserRole.OPERATOR])
 def test_vehicle_endpoints_are_admin_only(client, make_user, headers_for, truck, role):
     headers = headers_for(make_user(role))
-    assert client.get("/api/v1/vehicles/", headers=headers).status_code == 403
+    expected_list = 200 if role == UserRole.OPERATOR else 403  # operators may read the list
+    assert client.get("/api/v1/vehicles/", headers=headers).status_code == expected_list
+    assert client.get(f"/api/v1/vehicles/{truck.id}", headers=headers).status_code == 403
     response = client.patch(
         f"/api/v1/vehicles/{truck.id}/driver", json={"driverId": 1}, headers=headers
     )

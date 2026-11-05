@@ -27,20 +27,22 @@ from app.services.vehicles import (
 )
 
 # Vehicle management and driver assignment are Admin-only (SCW-F-020, SCW-F-022).
-router = APIRouter(
-    prefix="/vehicles",
-    tags=["vehicles"],
-    dependencies=[Depends(require_roles(UserRole.ADMIN))],
+# Operators may only read the list, to pick the vehicle when recording an intake.
+router = APIRouter(prefix="/vehicles", tags=["vehicles"])
+admin_only = [Depends(require_roles(UserRole.ADMIN))]
+
+
+@router.get(
+    "/",
+    response_model=list[VehicleRead],
+    dependencies=[Depends(require_roles(UserRole.ADMIN, UserRole.OPERATOR))],
 )
-
-
-@router.get("/", response_model=list[VehicleRead])
 def get_vehicles(db: Session = Depends(get_db)):
     """List all vehicles."""
     return list_vehicles(db)
 
 
-@router.get("/{vehicle_id}", response_model=VehicleRead)
+@router.get("/{vehicle_id}", response_model=VehicleRead, dependencies=admin_only)
 def get_vehicle_by_id(vehicle_id: int, db: Session = Depends(get_db)):
     """Retrieve a vehicle by ID."""
     try:
@@ -56,6 +58,7 @@ def get_vehicle_by_id(vehicle_id: int, db: Session = Depends(get_db)):
     "/",
     response_model=VehicleRead,
     status_code=status.HTTP_201_CREATED,
+    dependencies=admin_only,
 )
 def add_vehicle(data: VehicleCreate, db: Session = Depends(get_db)):
     """Create a vehicle."""
@@ -68,7 +71,7 @@ def add_vehicle(data: VehicleCreate, db: Session = Depends(get_db)):
         ) from exc
 
 
-@router.patch("/{vehicle_id}", response_model=VehicleRead)
+@router.patch("/{vehicle_id}", response_model=VehicleRead, dependencies=admin_only)
 def edit_vehicle(
     vehicle_id: int,
     data: VehicleUpdate,
@@ -89,7 +92,7 @@ def edit_vehicle(
         ) from exc
 
 
-@router.patch("/{vehicle_id}/driver", response_model=VehicleRead)
+@router.patch("/{vehicle_id}/driver", response_model=VehicleRead, dependencies=admin_only)
 def assign_vehicle_driver(
     vehicle_id: int,
     data: DriverAssignmentRequest,
