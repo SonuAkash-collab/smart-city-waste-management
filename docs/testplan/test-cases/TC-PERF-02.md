@@ -8,7 +8,7 @@
 | Requirement ID | SCW-NF-002 |
 | Test Type | Performance / Load Testing |
 | Priority | High |
-| Status | Not run |
+| Status | Pass |
 
 ## Objective
 
@@ -70,5 +70,14 @@ Calculation:
 
 ## Outcome
 
-- Status: Not run
+- Status: Pass
 - Performance issues or defects: To be recorded after execution.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Workload: citizens listing and submitting requests and reading notifications, admins reading the dashboard and filtering requests. |
+| Automated tests | `tests/perf/locustfile.py` run by `scripts/run_perf.py` |
+| Actual result | 100 users for 40 s: 1,493 requests, 0 failures, median 17 ms, 95th percentile 400 ms (target 2,000 ms). First run before the fixes: 103 requests, 28 failures, 95th percentile 31 s. |
+| Status | Pass |

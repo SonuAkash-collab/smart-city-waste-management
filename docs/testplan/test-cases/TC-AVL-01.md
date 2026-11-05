@@ -8,7 +8,7 @@
 | Requirement ID | SCW-NF-003 |
 | Test Type | Availability |
 | Priority | High |
-| Status | Not run |
+| Status | Not run yet |
 
 ## Objective
 
@@ -61,5 +61,16 @@ Verify that the system maintains at least 99% uptime over a continuous 24-hour m
 
 ## Outcome
 
-- Status: Not run
+- Status: Not run yet
 - Defects or observations: To be recorded after execution.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | `backend/scripts/availability_monitor.py` checks `/health` every minute and writes `availability-log.csv`. |
+| Automated tests | `test_health.py` (health endpoint) |
+| Actual result | To be filled after the 24-hour window. |
+| Status | Not run yet |
+
+How to run: start the app, then `python scripts/availability_monitor.py --url http://localhost:8000 --hours 24` on a computer that will not sleep. Record checks run, successes and uptime here.

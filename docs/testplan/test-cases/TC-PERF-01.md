@@ -22,7 +22,7 @@
 
 | \*\*Actual Result\*\* | To be recorded after execution. |
 
-| \*\*Status\*\* | Not run |
+| \*\*Status\*\* | Pass |
 
 
 
@@ -84,3 +84,13 @@ The overall test case passes only when both requirements pass. If either require
 
 \- Report performance failures as defects and attach the relevant test evidence.
 
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Measured with `backend/scripts/run_perf.py` against a separate database seeded by `seed_perf.py` (200 approved requests, 20 vehicles, 5 facilities). |
+| Automated tests | `test_route_engine_performance.py` (engine only, every CI run); `scripts/run_perf.py` (full API) |
+| Actual result | Route generation through the API: 0.94 s, 0.89 s and 0.93 s for 200 requests and 20 vehicles. Load test: see TC-PERF-02. Details in `docs/reports/perf-summary.md`. |
+| Status | Pass |
+
+The first load test failed (see defects D-1 and D-2 in `docs/sprints/sprint-3.md`); the result above is after the fixes.

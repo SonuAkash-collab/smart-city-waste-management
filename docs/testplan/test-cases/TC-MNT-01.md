@@ -8,7 +8,7 @@
 | Requirement ID | SCW-NF-005 |
 | Test Type | Maintainability / Unit Test Coverage |
 | Priority | High |
-| Status | Not run |
+| Status | Pass |
 
 ## Objective
 
@@ -67,5 +67,14 @@ Replace `<service_layer_package_or_directory>` with the repository's real servic
 
 ## Outcome
 
-- Status: Not run
+- Status: Pass
 - Coverage gaps or defects: To be recorded after execution.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Service layer is `backend/app/services`. CI fails if whole-backend coverage drops below 70%. |
+| Automated tests | `pytest --cov=app --cov-branch` (all 231 tests) |
+| Actual result | Service-layer statement coverage 97.9% (808 of 825 statements). See `docs/reports/code-coverage-report.md`. |
+| Status | Pass |
