@@ -9,7 +9,7 @@
 | Priority | High |
 | Preconditions | The application and authentication service are running. Test accounts with Admin and Citizen roles are available. HTTPS is configured in the test environment. |
 | Test Data | Valid Admin token, valid Citizen token, expired token, malformed token, missing token, and an endpoint restricted to Admin users. |
-| Status | Not run |
+| Status | Pass |
 
 ## Test Steps
 
@@ -49,3 +49,12 @@
 ## Evidence
 
 Record the test environment, actual HTTP status codes, relevant sanitized logs, and test results. Do not include passwords, complete JWTs, or other secrets in screenshots or reports.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Missing token: 401 NOT_AUTHENTICATED; expired: 401 TOKEN_EXPIRED; forged or malformed: 401 INVALID_TOKEN. The role is read from the database, not from the token. |
+| Automated tests | `test_auth.py` (token and role tests), `test_transport.py` |
+| Actual result | Token lifetime exactly 30 minutes; expired, forged, malformed and missing tokens 401; Citizen, Driver and Operator 403 on an Admin endpoint; a token claiming ADMIN for a citizen still got 403; plain HTTP redirected to HTTPS when FORCE_HTTPS=1. |
+| Status | Pass |

@@ -9,8 +9,8 @@
 | Priority | High |
 | Preconditions | 1. The authentication service and test database are available. 2. A dedicated test account exists with known credentials. 3. The account is active and initially unlocked. |
 | Test Data | Test account: `security_test_user`; valid password: `TestPass!123`; invalid password: `WrongPass!123`; lockout threshold: five consecutive failed attempts; lockout duration: 15 minutes. |
-| Actual Result | To be recorded during test execution. |
-| Status | Not run |
+| Actual Result | See the execution record below. |
+| Status | Pass |
 
 ## Test Steps
 
@@ -43,3 +43,12 @@
 ## Evidence
 
 Record the test environment, actual results, and relevant logs. Do not include plaintext passwords, access tokens, or other secrets in screenshots or reports. Keep the status as Not run until the test has been executed.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Lockout answers HTTP 403 with code ACCOUNT_LOCKED. bcrypt uses 10 rounds (defect D-2). |
+| Automated tests | `test_security_lockout.py` (6 tests), `test_auth.py::test_register_creates_citizen` |
+| Actual result | Stored value is a bcrypt hash; 4 failures did not lock; the 5th locked the account for 15 minutes and the right password was refused; login worked after expiry; a good login reset the counter. |
+| Status | Pass |
