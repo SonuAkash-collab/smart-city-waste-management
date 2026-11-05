@@ -10,5 +10,14 @@
 | Test data | Admin account ID; test request ID; test route ID; test user account ID; actions: approve request, reject request, generate route, change account details or status. |
 | Steps | 1. Log in as Admin. 2. Approve a test request and inspect the corresponding audit record. 3. Reject another test request and inspect its audit record. 4. Generate a route and inspect its audit record. 5. Make an account change and inspect its audit record. 6. Verify each audit record contains the actor identifier, action performed, timestamp and affected record identifier where applicable. 7. Verify that audit records can be retrieved by an authorized tester. |
 | Expected result | 1. Each specified administrative action creates an audit record. 2. Each record identifies the actor, action, timestamp and affected record identifier where applicable. 3. Records correspond to the correct actions and affected entities. 4. Audit records are available to authorized testers for verification. |
-| Actual result | To be filled during testing. |
-| Status | Not run |
+| Actual result | See the execution record below. |
+| Status | Pass |
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Admin changes are written by a middleware to `audit_logs`; `GET /api/v1/audit` lists them for Admins. |
+| Automated tests | `test_audit.py` (4 tests) |
+| Actual result | Approve, reject, route generation and account deactivation each created a record with the Admin's id, action, affected id and time; failed calls and reads were not recorded; non-Admins got 403. |
+| Status | Pass |
