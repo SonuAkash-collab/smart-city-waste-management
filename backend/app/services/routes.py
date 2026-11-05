@@ -191,3 +191,46 @@ def generate_routes(db: Session, day: date) -> dict:
             else "No routes planned: no approved requests or no available vehicles with a driver."
         ),
     }
+
+
+def _driver_vehicle_ids(db: Session, driver: User) -> list[int]:
+    return list(db.scalars(select(Vehicle.id).where(Vehicle.driver_id == driver.id)).all())
+
+
+def list_routes(db: Session, user: User, day: date | None = None) -> list[Route]:
+    """Admins see every route; drivers only routes of the vehicle they drive."""
+    query = select(Route).order_by(Route.route_date.desc(), Route.id)
+    if user.role != UserRole.ADMIN:
+        query = query.where(Route.vehicle_id.in_(_driver_vehicle_ids(db, user)))
+    if day is not None:
+        query = query.where(Route.route_date == day)
+    return list(db.scalars(query.limit(100)).all())
+
+
+def assigned_routes(db: Session, driver: User) -> list[Route]:
+    """The driver's routes that are planned or under way (SCW-F-043)."""
+    return list(
+        db.scalars(
+            select(Route)
+            .where(
+                Route.vehicle_id.in_(_driver_vehicle_ids(db, driver)),
+                Route.status.in_(ACTIVE_ROUTE),
+            )
+            .order_by(Route.route_date, Route.id)
+        ).all()
+    )
+
+
+def get_route(db: Session, route_id: int) -> Route:
+    route = db.get(Route, route_id)
+    if route is None:
+        raise ApiError(404, "ROUTE_NOT_FOUND", "Route not found.")
+    return route
+
+
+def get_route_for(db: Session, user: User, route_id: int) -> Route:
+    """A route for an Admin or the driver of its vehicle; other drivers get 403."""
+    route = get_route(db, route_id)
+    if user.role != UserRole.ADMIN and route.vehicle_id not in _driver_vehicle_ids(db, user):
+        raise ApiError(403, "FORBIDDEN", "This route belongs to another driver.")
+    return route
