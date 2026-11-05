@@ -12,7 +12,16 @@
 | Steps | 1. For each request available in one of the seven documented statuses, call `GET /api/v1/requests/{id}` using the authenticated Citizen context and record the returned status. 2. For a separate request with status `SUBMITTED` and another with status `APPROVED`, call `DELETE /api/v1/requests/{id}` as the owning Citizen. Record each response, then retrieve each request with `GET /api/v1/requests/{id}` and record its status. 3. For separate requests with status `SCHEDULED`, `COLLECTED`, `REJECTED`, `MISSED`, and `CANCELLED`, call `DELETE /api/v1/requests/{id}` as the owning Citizen. Record each HTTP status, then retrieve each request with `GET /api/v1/requests/{id}` and record its status to check that it is unchanged. |
 | Expected result | Step 1: Each `GET /api/v1/requests/{id}` returns HTTP 200 with the full request object, and its status matches the request's status: `SUBMITTED`, `APPROVED`, `SCHEDULED`, `COLLECTED`, `REJECTED`, `MISSED`, or `CANCELLED`. Step 2: Each DELETE for a request before `SCHEDULED` returns HTTP 200 with the deleted request's `id` and status `CANCELLED`; subsequent GET returns the request with status `CANCELLED`. Step 3: Each DELETE for a request at `SCHEDULED` or later—including the documented `COLLECTED`, `REJECTED`, `MISSED`, and `CANCELLED` statuses—returns HTTP 409; subsequent GET confirms the request status is unchanged. |
 | Pass/fail criteria | Pass if the Citizen's GET response reports the expected value for every available supported status, DELETE returns HTTP 200 and changes status to `CANCELLED` for requests in `SUBMITTED` and `APPROVED`, and DELETE returns HTTP 409 without changing status for requests in `SCHEDULED`, `COLLECTED`, `REJECTED`, `MISSED`, and `CANCELLED`. Fail if any observed result differs. Mark affected checks Blocked if the required authenticated context or status-specific requests are unavailable; no credentials, direct database state, or fixture setup method is assumed. |
-| Actual result | |
-| Status | Not run |
+| Actual result | See the execution record below. |
+| Status | Pass |
 
 The API contract specifies `GET /api/v1/requests/{id}` for the request owner or Admin, with HTTP 200 returning the full request object. For cancellation it specifies `DELETE /api/v1/requests/{id}` for the owning Citizen, HTTP 200 with `{"id":101,"status":"CANCELLED"}`, and HTTP 409 if the request is `SCHEDULED` or later. The project sources do not prescribe how to prepare status-specific test requests; this case assumes suitable requests are supplied by the test environment and marks checks Blocked if they are unavailable.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Request details also show `scheduledDate` and `routeId` once the request is on a route. |
+| Automated tests | `test_requests_admin.py` (cancel tests), `test_requests_tracking.py` |
+| Actual result | GET returned each of the seven statuses; DELETE on SUBMITTED and APPROVED returned 200 with status CANCELLED; DELETE on SCHEDULED, COLLECTED, REJECTED, MISSED and CANCELLED returned 409 and the status did not change. A request was followed from SUBMITTED to COLLECTED through the real route flow. |
+| Status | Pass |
