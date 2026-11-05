@@ -5,6 +5,7 @@ import Login from './auth/Login.js';
 import Register from './auth/Register.js';
 import Home from './Home.js';
 import AdminRoutes from './routes/AdminRoutes.js';
+import DriverRoute from './routes/DriverRoute.js';
 import AdminRequests from './requests/AdminRequests.js';
 import SubmitRequest from './requests/SubmitRequest.js';
 
@@ -15,6 +16,7 @@ export const pages = [
   { path: '/requests/new', component: SubmitRequest, label: 'Request pickup', roles: ['CITIZEN'] },
   { path: '/admin/requests', component: AdminRequests, label: 'Requests', roles: ['ADMIN'] },
   { path: '/admin/routes', component: AdminRoutes, label: 'Routes', roles: ['ADMIN'] },
+  { path: '/driver/route', component: DriverRoute, label: 'My route', roles: ['DRIVER'] },
   { path: '/admin/staff', component: Staff, label: 'Staff', roles: ['ADMIN'] },
 ];
 
