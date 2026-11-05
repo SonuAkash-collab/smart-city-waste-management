@@ -12,7 +12,16 @@
 | Steps | 1. As Admin, use the documented account-management function to create a Driver account with its name, email, Driver role, and temporary password. 2. Repeat to create an Operator account with its name, email, Operator role, and temporary password. 3. Using each account's assigned email and temporary password, call `POST /api/v1/auth/login`; record the HTTP result and the role claim in the returned JWT. 4. As Admin, use the documented account-management function to deactivate the Driver account. 5. Attempt to log in as that Driver using `POST /api/v1/auth/login` and its assigned email and temporary password; record the HTTP status. |
 | Expected result | Steps 1–2: The Admin account-management function creates each account with its assigned role. The project documents the account fields but does not define an account-creation endpoint, request body schema, success status, or response body. Steps 3: Each login returns HTTP 200 with a JWT whose role claim matches the created account's role (Driver or Operator). Step 4: The Admin account-management function deactivates the Driver account; the project does not define a deactivation endpoint, request schema, success status, or response body. Step 5: Login for the deactivated Driver returns HTTP 401, as required by SCW-F-003; no specific error body is prescribed for this case. |
 | Pass/fail criteria | Pass if the Admin can create both accounts with their assigned roles, the Driver and Operator can each log in with HTTP 200 and receive a JWT with the matching role claim, and the deactivated Driver's login returns HTTP 401. Fail if any supported outcome differs. Mark account creation or deactivation checks Blocked if the documented account-management function is unavailable; do not substitute an undocumented endpoint or payload. |
-| Actual result | |
-| Status | Not run |
+| Actual result | See the execution record below. |
+| Status | Pass |
 
 The account fields, Admin authority, deactivation behavior, and HTTP 401 criterion are specified by SRS Section 4.1. Successful login status and role-bearing JWT behavior are specified by SRS Section 4.1; `POST /api/v1/auth/login` is used as documented in `TC-AUTH-01`. The account-creation and deactivation API contracts (paths, request schemas, success responses) are not defined in the available project documents.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Account management: `POST /api/v1/users {email, fullName, role, temporaryPassword}` and `PATCH /api/v1/users/{id}/status {isActive}`, Admin only. Web page: Staff. |
+| Automated tests | `test_users.py` |
+| Actual result | Driver and Operator accounts were created and logged in with 200 and the right role claim; after deactivation login returned 401 and the old token was refused. |
+| Status | Pass |

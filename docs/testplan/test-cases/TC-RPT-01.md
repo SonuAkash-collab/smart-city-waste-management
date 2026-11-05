@@ -8,7 +8,7 @@
 | Requirement IDs | SCW-F-051, SCW-F-052 |
 | Test Type | Functional / Reporting |
 | Priority | High |
-| Status | Not run |
+| Status | Pass |
 
 ## Objective
 
@@ -69,5 +69,14 @@ Record the test dataset and expected counts before execution.
 
 ## Outcome
 
-- Status: Not run
-- Defects or observations: To be recorded after execution.
+- Status: Pass
+- Defects or observations: None open; see the execution record.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Dashboard: `GET /api/v1/dashboard`. CSV: `GET /api/v1/reports/daily.csv?date=YYYY-MM-DD` with columns date, route_id, vehicle_registration, driver_name, request_id, waste_type, quantity_kg, stop_status, facility_id. |
+| Automated tests | `test_dashboard_reports.py` |
+| Actual result | Dashboard counts matched the test records; the CSV had the header and exactly one row per route stop for the date (2 pickups + 1 facility visit), with matching values; another date gave only the header. |
+| Status | Pass |
