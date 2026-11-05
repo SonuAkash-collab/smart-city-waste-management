@@ -12,7 +12,16 @@
 | Steps | 1. Using the authenticated Citizen request context, send `POST /api/v1/requests` with the valid request without a photo. 2. Send the same endpoint with the base64-encoded photo fixture included. 3. Use the documented `GET /api/v1/requests/{id}` endpoint as the request owner to retrieve the request submitted in step 2. 4. Send the POST endpoint with the missing-location request. Record the HTTP status and response body for each request. |
 | Expected result | Steps 1 and 2: HTTP 201. Each response contains `id`, `status`, `priority`, and `createdAt`; the API example is `{"id":101,"status":"SUBMITTED","priority":"HIGH","createdAt":"2026-10-10T10:00:00Z"}`. `HAZARDOUS` is assigned `HIGH` under SCW-F-011. The photo submission is accepted and its photo is associated with the stored request as required by SCW-F-010. Step 3: HTTP 200 with the full request object, through which the saved request and photo association can be checked. Working assumption: use the returned full request as the observation point; no photo-specific response property or representation is prescribed. Step 4: HTTP 422 with the common API error body and code `LOCATION_REQUIRED`; the missing-location request is rejected. |
 | Pass/fail criteria | Pass if both valid submissions return HTTP 201 with the documented response fields and applicable values, the owner GET returns HTTP 200 and provides evidence that the submitted photo is associated with the saved request, and the missing-location submission returns HTTP 422 with error code `LOCATION_REQUIRED`. Fail if any of these outcomes does not occur. Working assumption: evaluate photo association from the full request returned by the documented GET endpoint without requiring an undocumented property name or representation. |
-| Actual result | |
-| Status | Not run |
+| Actual result | See the execution record below. |
+| Status | Pass |
 
 The `id` and `createdAt` shown in the response example are example values, not fixed values for each test execution. The API contract also lists HTTP 401 for POST; authentication-failure behavior is outside the registered TC-REQ-01 scope.
+
+## Execution record (Part 3, November 2026)
+
+| Field | Details |
+|---|---|
+| Changes after the sprints | Missing coordinates return 422 LOCATION_REQUIRED; a typed address is turned into coordinates by the web app. An invalid base64 photo returns 422 INVALID_PHOTO. |
+| Automated tests | `test_requests_submit.py` (submission tests) |
+| Actual result | Without photo: 201 with id, status SUBMITTED, priority HIGH, createdAt. With photo: 201, and GET returned `hasPhoto: true` and the same photo. Missing location: 422 LOCATION_REQUIRED. |
+| Status | Pass |
