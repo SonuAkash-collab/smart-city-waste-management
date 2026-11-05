@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app import models  # noqa: F401  (registers tables on Base.metadata)
 from app.core.errors import register_error_handlers
+from app.core.transport import apply_transport_security
 from app.db import Base, engine
 from app.services.audit import AuditMiddleware
 from app.routers import (
@@ -35,6 +36,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="Smart City Waste Management System", version="1.0", lifespan=lifespan)
 register_error_handlers(app)
 app.add_middleware(AuditMiddleware)  # SCW-SEC-006
+apply_transport_security(app)  # SCW-SEC-003
 
 app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(users.router, prefix=API_PREFIX)
