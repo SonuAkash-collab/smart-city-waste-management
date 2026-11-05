@@ -1,6 +1,7 @@
 import { post } from '../../api.js';
 import { html, Notice, useState } from '../../lib.js';
 import { saveSession } from '../../session.js';
+import { AuthAside } from './Login.js';
 
 export default function Register() {
   const [form, setForm] = useState({ fullName: '', email: '', password: '', confirm: '' });
@@ -27,32 +28,36 @@ export default function Register() {
   };
 
   return html`
-    <section class="card stack" style=${{ maxWidth: '460px', margin: '2rem auto' }}>
-      <h1>Create an account</h1>
-      <p class="muted">Citizens can request pickups and follow their status.</p>
-      <${Notice} kind="error">${error}<//>
-      <form class="stack" onSubmit=${submit}>
-        <div>
-          <label for="name">Full name</label>
-          <input id="name" required autocomplete="name" value=${form.fullName} onInput=${set('fullName')} />
-        </div>
-        <div>
-          <label for="r-email">Email</label>
-          <input id="r-email" type="email" required autocomplete="email" value=${form.email} onInput=${set('email')} />
-        </div>
-        <div class="row">
+    <section class="auth">
+      <${AuthAside} />
+      <div class="auth-form">
+        <span class="eyebrow">For citizens</span>
+        <h1>Create an account</h1>
+        <p class="muted">Citizens can request pickups and follow their status.</p>
+        <${Notice} kind="error">${error}<//>
+        <form class="stack" onSubmit=${submit}>
           <div>
-            <label for="r-pass">Password <span class="hint">(8+ characters)</span></label>
-            <input id="r-pass" type="password" required autocomplete="new-password" value=${form.password} onInput=${set('password')} />
+            <label for="name">Full name</label>
+            <input id="name" required autocomplete="name" value=${form.fullName} onInput=${set('fullName')} />
           </div>
           <div>
-            <label for="r-confirm">Repeat password</label>
-            <input id="r-confirm" type="password" required autocomplete="new-password" value=${form.confirm} onInput=${set('confirm')} />
+            <label for="r-email">Email</label>
+            <input id="r-email" type="email" required autocomplete="email" value=${form.email} onInput=${set('email')} />
           </div>
-        </div>
-        <button type="submit" disabled=${busy}>${busy ? 'Creating…' : 'Create account'}</button>
-      </form>
-      <p class="muted">Already registered? <a href="#/login">Log in</a>.</p>
+          <div class="row">
+            <div>
+              <label for="r-pass">Password <span class="hint">(8+ characters)</span></label>
+              <input id="r-pass" type="password" required autocomplete="new-password" value=${form.password} onInput=${set('password')} />
+            </div>
+            <div>
+              <label for="r-confirm">Repeat password</label>
+              <input id="r-confirm" type="password" required autocomplete="new-password" value=${form.confirm} onInput=${set('confirm')} />
+            </div>
+          </div>
+          <button type="submit" class="big" disabled=${busy}>${busy ? 'Creating…' : 'Create account'}</button>
+        </form>
+        <p class="muted">Already registered? <a href="#/login">Log in</a>.</p>
+      </div>
     </section>
   `;
 }
