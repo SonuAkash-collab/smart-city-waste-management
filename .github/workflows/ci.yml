@@ -26,3 +26,14 @@ jobs:
 
       - name: Run tests with coverage
         run: python -m pytest --cov=app --cov-branch --cov-report=term-missing --cov-fail-under=70
+
+      - name: Build test reports
+        if: always()
+        run: python scripts/generate_reports.py --out ../ci-reports
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: ci-reports/
