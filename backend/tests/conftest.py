@@ -2,6 +2,7 @@ import itertools
 import os
 
 os.environ.setdefault("BCRYPT_ROUNDS", "4")  # fast hashing in tests only
+os.environ.setdefault("EMAIL_OUTBOX", os.devnull)  # tests keep emails in memory only
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
