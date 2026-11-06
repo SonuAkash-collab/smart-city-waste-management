@@ -14,7 +14,7 @@ Automated checks run in CI on every pull request; the TLS check was run by hand 
 | Input validation | Bad email, short password, missing location, non-positive weights and capacities, unknown waste types all return 422 with the common error body | `test_auth.py`, `test_requests_submit.py`, `test_facilities.py`, `test_vehicles.py` | Pass |
 | Injection | All database access goes through SQLAlchemy with bound parameters; no SQL is built from strings | Code review of `app/services` | Pass |
 | Error bodies | Errors use `{"error": {"code", "message"}}`; unexpected errors return a generic 500 without stack traces | `app/core/errors.py`, `test_web.py::test_unknown_api_path_gives_json_error` | Pass |
-| Security headers | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin` on every response | `test_transport.py::test_security_headers_always_present` | Pass |
+| Security headers | `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin` on every response | `test_transport.py::test_security_headers_always_present` | Pass |
 
 ## STRIDE follow-up (SAD 3.9)
 
