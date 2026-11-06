@@ -1,4 +1,5 @@
 import { get, patch, post } from '../../api.js';
+import Icon from '../../components/Icon.js';
 import { Badge, html, Notice, useEffect, useState, WASTE_TYPES } from '../../lib.js';
 
 const EMPTY = { registrationNumber: '', capacityKg: '', wasteTypes: ['MIXED'], depotLatitude: '12.9300', depotLongitude: '77.5400' };
@@ -36,16 +37,29 @@ export default function Vehicles() {
   const change = (id, body) => patch(`/vehicles/${id}`, body).then(load).catch(fail);
   const assign = (id, driverId) => driverId && patch(`/vehicles/${id}/driver`, { driverId: Number(driverId) }).then(load).catch(fail);
 
+  const count = (status) => vehicles.filter((v) => v.status === status).length;
   return html`
-    <div class="page-head"><div><h1>Vehicles</h1><p class="muted">Fleet, capacity, status and drivers.</p></div></div>
+    <div class="page-head"><div><span class="eyebrow">Resources</span><h1>Vehicles</h1><p class="muted">Fleet, capacity, status and drivers.</p></div></div>
+    ${vehicles.length > 0 && html`<div class="kpis">
+      <div class="kpi"><div class="v">${vehicles.length}</div><div class="l">Vehicles</div></div>
+      <div class="kpi k-green"><div class="v">${count('AVAILABLE')}</div><div class="l">Available</div></div>
+      <div class="kpi k-blue"><div class="v">${count('ON_ROUTE')}</div><div class="l">On route</div></div>
+      <div class="kpi k-amber"><div class="v">${count('MAINTENANCE')}</div><div class="l">In maintenance</div></div>
+      <div class="kpi"><div class="v">${vehicles.filter((v) => !v.driverId).length}</div><div class="l">Without a driver</div></div>
+    </div>`}
     <${Notice} kind=${msg.kind}>${msg.text}<//>
     <section class="card">
       <table class="responsive">
         <thead><tr><th>Vehicle</th><th>Capacity / load</th><th>Waste types</th><th>Status</th><th>Driver</th></tr></thead>
         <tbody>
           ${vehicles.map((v) => html`<tr key=${v.id}>
-            <td data-label="Vehicle"><strong>${v.registrationNumber}</strong> <span class="hint">ID ${v.id}</span></td>
-            <td data-label="Capacity">${v.currentLoadKg} / ${v.capacityKg} kg</td>
+            <td data-label="Vehicle"><span class="veh"><span class="veh-icon"><${Icon} name="truck" /></span><span><strong>${v.registrationNumber}</strong><br /><span class="hint">ID ${v.id}</span></span></span></td>
+            <td data-label="Capacity">
+              <span class="num">${v.currentLoadKg} / ${v.capacityKg} kg</span>
+              <div class=${'bar' + (v.currentLoadKg / v.capacityKg > 0.85 ? ' bad' : v.currentLoadKg / v.capacityKg > 0.6 ? ' warn' : '')} style=${{ marginTop: '0.3rem' }}>
+                <span style=${{ width: `${Math.min(100, (100 * v.currentLoadKg) / v.capacityKg)}%` }}></span>
+              </div>
+            </td>
             <td data-label="Waste">${v.wasteTypes.join(', ')}</td>
             <td data-label="Status">
               ${v.status === 'ON_ROUTE'
