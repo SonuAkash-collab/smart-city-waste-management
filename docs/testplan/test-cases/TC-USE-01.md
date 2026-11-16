@@ -8,7 +8,7 @@
 | Requirement ID | SCW-NF-004 |
 | Test Type | Usability |
 | Priority | High |
-| Status | Not run yet |
+| Status | Not run |
 
 ## Objective
 
@@ -62,9 +62,10 @@ Verify that first-time users can submit a request within 3 minutes on both a des
 
 ## Outcome
 
-- Status: Not run yet
-- Usability issues observed: None open; see the execution record.
-- Evidence location: None open; see the execution record.
+- Status: Not run
+- Reason: the session with five first-time users was not held before the final submission, so no attempts were timed.
+- Usability issues observed: None recorded, because the session was not run.
+- Evidence location: None, because the session was not run.
 
 ## Execution record (Part 3, November 2026)
 
@@ -72,7 +73,7 @@ Verify that first-time users can submit a request within 3 minutes on both a des
 |---|---|
 | Changes after the sprints | The request form works at 360 px (checked in a browser at 360 x 780). |
 | Automated tests | `test_web.py` (web app served); browser walkthrough at 360 px |
-| Actual result | To be filled after the sessions with five first-time users. |
-| Status | Not run yet |
+| Actual result | Not run: the session with five first-time users was not held before the final submission. |
+| Status | Not run |
 
 How to run: give each participant the task 'Request a pickup of 10 kg of garden waste at your home', time it on a laptop and on a phone (or a browser at 360 px), give no help, and record time and success for all 10 attempts in the table above.
