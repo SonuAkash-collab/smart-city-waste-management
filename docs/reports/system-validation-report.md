@@ -1,6 +1,6 @@
 # System Validation Report
 
-All 26 test cases of the Test Plan were run against the finished system (development frozen on 4 Nov 2026). Functional and security cases ran as automated end-to-end API tests through the running FastAPI app (CI on every pull request), plus a browser walkthrough of every page for all four roles at desktop width and 360 px. Performance cases ran with `scripts/run_perf.py` (see `perf-summary.md`).
+All 26 test cases of the Test Plan were run against the finished system (feature development frozen on 4 Nov 2026; Sprint 3 (5-6 Nov) added testing, the UI redesign (S-43..S-46) and one map-tile fix, no new features). Functional and security cases ran as automated end-to-end API tests through the running FastAPI app (CI on every pull request), plus a browser walkthrough of every page for all four roles at desktop width and 360 px. Performance cases ran with `scripts/run_perf.py` (see `perf-summary.md`).
 
 ## Summary
 
