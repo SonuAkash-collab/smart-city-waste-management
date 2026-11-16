@@ -17,6 +17,10 @@
 | Unit Test Report, TC-REQ-01..04, TC-USE-01, Sprint 2 notes, user guide, README | Rishit |
 | System Validation Report, TC-AUTH-01/02, TC-NOT-01, TC-ADM-01, TC-RPT-01, traceability, Test Plan document | Sonu |
 
+## UI redesign
+
+Alongside testing, the team restyled the frontend without adding features: S-43 design system and sidebar (Sonu), S-44 landing, login and request pages (Rishit), S-45 routes and driver pages (Haritej) and S-46 dashboard and fleet pages (Puru).
+
 ## Defects found by testing
 
 | ID | Found by | What happened | Fix |

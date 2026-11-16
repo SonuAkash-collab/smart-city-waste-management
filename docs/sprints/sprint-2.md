@@ -5,7 +5,7 @@
 | Sprint | 2 |
 | Dates | Mon 2 Nov 2026 to Wed 4 Nov 2026 (planned 26 to 30 Oct; see `deviations.md`) |
 | Goal | The full collection cycle: routes, drivers, tracking, notifications, dashboard, security |
-| Result | All Sprint 2 stories merged; development frozen on 4 Nov |
+| Result | All Sprint 2 stories merged; feature development frozen on 4 Nov; Sprint 3 (5-6 Nov) added testing, the UI redesign (S-43..S-46) and one map-tile fix, no new features |
 
 ## Stories completed
 
