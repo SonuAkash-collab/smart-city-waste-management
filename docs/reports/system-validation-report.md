@@ -37,7 +37,7 @@ The two cases not run yet need people or time rather than code: TC-USE-01 needs 
 | TC-SEC-02 | SCW-SEC-002, SCW-SEC-003, SCW-SEC-004 | Token lifetime exactly 30 minutes; expired, forged, malformed and missing tokens 401; Citizen, Driver and Operator 403 on an Admin endpoint; a token claiming ADMIN for a citizen still got 403; plain HTTP redirected to HTTPS when FORCE_HTTPS=1. | Pass |
 | TC-SEC-03 | SCW-SEC-003 | Local server with a self-signed certificate: TLS 1.3 negotiated, TLS 1.1 refused; protected endpoint over HTTPS without a token returned 401; plain HTTP redirected with no data. | Pass |
 | TC-SEC-04 | SCW-SEC-006 | Approve, reject, route generation and account deactivation each created a record with the Admin's id, action, affected id and time; failed calls and reads were not recorded; non-Admins got 403. | Pass |
-| TC-USE-01 | SCW-NF-004 | To be filled after the sessions with five first-time users. | Not run yet |
+| TC-USE-01 | SCW-NF-004 | Not run: the session with five first-time users was not held before the final submission. | Not run |
 | TC-VEH-01 | SCW-F-020, SCW-F-021 | Valid vehicle saved; duplicate registration 409; missing, zero and negative capacity 422; edits saved; Maintenance and On Route vehicles were not given routes; vehicle returned to Available after its route. | Pass |
 | TC-VEH-02 | SCW-F-022 | Driver assigned and returned in vehicle details; nonexistent driver 404, non-driver or inactive user 422; same driver on a second vehicle 409; Citizen 403. | Pass |
 
